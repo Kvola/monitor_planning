@@ -1,0 +1,98 @@
+<odoo>
+    <!-- ============= RAPPORTS ============= -->
+    
+    <!-- Vue liste des rapports -->
+    <record id="view_monitor_report_tree" model="ir.ui.view">
+        <field name="name">monitor.report.tree</field>
+        <field name="model">monitor.report</field>
+        <field name="arch" type="xml">
+            <tree string="Rapports d'activité">
+                <field name="monitor_id"/>
+                <field name="report_date"/>
+                <field name="period_from"/>
+                <field name="period_to"/>
+                <field name="total_interventions"/>
+                <field name="completed_interventions"/>
+                <field name="total_hours"/>
+                <field name="average_rating"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue formulaire des rapports -->
+    <record id="view_monitor_report_form" model="ir.ui.view">
+        <field name="name">monitor.report.form</field>
+        <field name="model">monitor.report</field>
+        <field name="arch" type="xml">
+            <form string="Rapport d'activité">
+                <header>
+                    <button name="action_submit" string="Soumettre" type="object" invisible="state != 'draft'" class="oe_highlight"/>
+                    <button name="action_validate" string="Valider" type="object" invisible="state != 'submitted'" class="oe_highlight"/>
+                    <button name="action_reject" string="Rejeter" type="object" invisible="state != 'submitted'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,validated"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <span>Rapport d'activité de </span>
+                            <field name="monitor_id" class="oe_inline"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="report_date"/>
+                            <field name="period_from"/>
+                            <field name="period_to"/>
+                        </group>
+                        <group>
+                            <field name="validated_by_id" invisible="state not in ['validated']"/>
+                            <field name="validation_date" invisible="state not in ['validated']"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Statistiques d'activité">
+                        <group>
+                            <field name="total_interventions"/>
+                            <field name="completed_interventions"/>
+                            <field name="cancelled_interventions"/>
+                        </group>
+                        <group>
+                            <field name="total_hours"/>
+                            <field name="average_participants"/>
+                            <field name="average_rating"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Rapport narratif">
+                            <group>
+                                <field name="activities_summary" placeholder="Résumé des activités réalisées..."/>
+                                <field name="achievements" placeholder="Principales réalisations..."/>
+                                <field name="challenges" placeholder="Défis rencontrés..."/>
+                                <field name="suggestions" placeholder="Suggestions d'amélioration..."/>
+                            </group>
+                        </page>
+                        <page string="Objectifs">
+                            <group>
+                                <field name="objectives_met" placeholder="Objectifs atteints durant cette période..."/>
+                                <field name="next_period_objectives" placeholder="Objectifs pour la prochaine période..."/>
+                            </group>
+                        </page>
+                        <page string="Validation" invisible="state in ['draft']">
+                            <field name="validation_comments" placeholder="Commentaires de validation..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action pour les rapports -->
+    <record id="action_monitor_report" model="ir.actions.act_window">
+        <field name="name">Rapports d'activité</field>
+        <field name="res_model">monitor.report</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

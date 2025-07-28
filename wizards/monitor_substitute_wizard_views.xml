@@ -1,0 +1,39 @@
+<odoo>
+    <!-- ============= WIZARDS ============= -->
+
+    <!-- Vue formulaire du wizard de remplacement -->
+    <record id="view_monitor_substitute_wizard_form" model="ir.ui.view">
+        <field name="name">monitor.substitute.wizard.form</field>
+        <field name="model">monitor.substitute.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Demander un remplaçant">
+                <group>
+                    <field name="planning_id" readonly="1" />
+                    <field name="school_id" readonly="1" />
+                    <field name="substitute_monitor_id" />
+                </group>
+                <group>
+                    <field name="reason" colspan="2" />
+                    <field name="notify_substitute" />
+                </group>
+                <footer>
+                    <button name="action_assign_substitute" string="Assigner" type="object"
+                        class="oe_highlight" />
+                    <button string="Annuler" class="btn-secondary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+    <!-- Action pour le wizard de remplacement -->
+    <record id="action_monitor_substitute_wizard" model="ir.actions.act_window">
+        <field name="name">Demander un remplaçant</field>
+        <field name="res_model">monitor.substitute.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_planning_id': active_id}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Demander un remplaçant pour une planification.</p>
+            <p>Veuillez remplir les détails nécessaires et assigner un remplaçant.</p>
+        </field>
+    </record>
+</odoo>

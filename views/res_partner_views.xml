@@ -1,0 +1,49 @@
+<odoo>
+    <!-- ============= EXTENSION RES.PARTNER ============= -->
+    
+    <!-- Vue formulaire étendue pour les moniteurs -->
+    <record id="view_partner_monitor_form" model="ir.ui.view">
+        <field name="name">res.partner.monitor.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="random_team_generator.view_partner_form_extended"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <!-- Boutons pour les moniteurs -->
+                <button name="action_view_monitor_plannings" type="object" class="oe_stat_button" icon="fa-calendar" invisible="not is_monitor">
+                    <field name="planning_count" widget="statinfo" string="Planifications"/>
+                </button>
+                <button name="action_view_upcoming_plannings" type="object" class="oe_stat_button" icon="fa-clock-o" invisible="not is_monitor">
+                    <field name="upcoming_planning_count" widget="statinfo" string="À venir"/>
+                </button>
+                <button name="action_view_monitor_evaluations" type="object" class="oe_stat_button" icon="fa-star" invisible="not is_monitor">
+                    <field name="evaluation_count" widget="statinfo" string="Évaluations"/>
+                </button>
+                <button name="action_view_monitor_trainings" type="object" class="oe_stat_button" icon="fa-graduation-cap" invisible="not is_monitor">
+                    <field name="training_count" widget="statinfo" string="Formations"/>
+                </button>
+                <button name="action_view_monitor_certificates" type="object" class="oe_stat_button" icon="fa-certificate" invisible="not is_monitor">
+                    <field name="certificate_count" widget="statinfo" string="Certificats"/>
+                </button>
+                <!-- <field name="is_monitor" invisible="1"/> -->
+            </xpath>
+            
+            <!-- Onglet pour les moniteurs -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Moniteur" invisible="not is_monitor">
+                    <group>
+                        <group string="Statistiques">
+                            <!-- <field name="is_monitor" invisible="1"/> -->
+                            <field name="completed_planning_count"/>
+                            <field name="substitute_count"/>
+                            <field name="last_evaluation_date"/>
+                            <field name="average_evaluation_rating" widget="progressbar"/>
+                        </group>
+                        <group string="Formation">
+                            <field name="last_training_date"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

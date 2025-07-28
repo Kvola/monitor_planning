@@ -1,0 +1,64 @@
+<odoo>
+    <!-- ============= CERTIFICATS ============= -->
+
+    <!-- Vue liste des certificats -->
+    <record id="view_monitor_certificate_tree" model="ir.ui.view">
+        <field name="name">monitor.certificate.tree</field>
+        <field name="model">monitor.certificate</field>
+        <field name="arch" type="xml">
+            <tree string="Certificats" decoration-danger="is_expired">
+                <field name="certificate_number" />
+                <field name="monitor_id" />
+                <field name="name" />
+                <field name="certificate_type" />
+                <field name="certificate_date" />
+                <field name="expiry_date" />
+                <field name="is_expired" />
+                <field name="issued_by_id" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue formulaire des certificats -->
+    <record id="view_monitor_certificate_form" model="ir.ui.view">
+        <field name="name">monitor.certificate.form</field>
+        <field name="model">monitor.certificate</field>
+        <field name="arch" type="xml">
+            <form string="Certificat">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom du certificat..." />
+                        </h1>
+                        <h2>
+                            <field name="certificate_number" readonly="1" />
+                        </h2>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="monitor_id" />
+                            <field name="certificate_type" />
+                            <field name="training_id" invisible="certificate_type != 'training'" />
+                        </group>
+                        <group>
+                            <field name="certificate_date" />
+                            <field name="expiry_date" />
+                            <field name="is_expired" />
+                            <field name="issued_by_id" />
+                        </group>
+                    </group>
+
+                    <field name="description" placeholder="Description du certificat..." />
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action pour les certificats -->
+    <record id="action_monitor_certificate" model="ir.actions.act_window">
+        <field name="name">Certificats des moniteurs</field>
+        <field name="res_model">monitor.certificate</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

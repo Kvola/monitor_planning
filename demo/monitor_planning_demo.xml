@@ -1,0 +1,179 @@
+<odoo>
+    <data noupdate="1">
+
+        <!-- Moniteurs de démonstration -->
+        <record id="monitor_demo_1" model="res.partner">
+            <field name="name">Marie Dubois</field>
+            <field name="is_company">False</field>
+            <field name="is_monitor">True</field>
+            <field name="email">marie.dubois@example.com</field>
+            <field name="phone">+225 01 02 03 04 05</field>
+            <field name="gender">female</field>
+            <field name="birthdate">1985-03-15</field>
+        </record>
+
+        <record id="monitor_demo_2" model="res.partner">
+            <field name="name">Jean Martin</field>
+            <field name="is_company">False</field>
+            <field name="is_monitor">True</field>
+            <field name="email">jean.martin@example.com</field>
+            <field name="phone">+225 01 02 03 04 06</field>
+            <field name="gender">male</field>
+            <field name="birthdate">1980-07-22</field>
+        </record>
+
+        <record id="monitor_demo_3" model="res.partner">
+            <field name="name">Sarah Koné</field>
+            <field name="is_company">False</field>
+            <field name="is_monitor">True</field>
+            <field name="email">sarah.kone@example.com</field>
+            <field name="phone">+225 01 02 03 04 07</field>
+            <field name="gender">female</field>
+            <field name="birthdate">1990-11-08</field>
+        </record>
+
+        <!-- École de démonstration -->
+        <record id="school_demo" model="res.partner">
+            <field name="name">École du Dimanche Bethel</field>
+            <field name="is_company">True</field>
+            <field name="organization_type">school</field>
+            <field name="email">ecole@bethel.ci</field>
+            <field name="phone">+225 01 02 03 04 00</field>
+        </record>
+
+        <!-- Modèle de planification de démonstration -->
+        <record id="template_demo" model="monitor.planning.template">
+            <field name="name">École Bethel - Dimanche matin</field>
+            <field name="description">Planification hebdomadaire pour l'école du dimanche de Bethel</field>
+            <field name="school_id" ref="school_demo" />
+            <field name="recurrence_type">weekly</field>
+            <field name="weekday">6</field>  <!-- Dimanche -->
+            <field name="start_time">9.0</field>
+            <field name="end_time">11.0</field>
+            <field name="active_from" eval="DateTime.now().strftime('%Y-%m-%d')" />
+            <field name="active_until"
+                eval="(DateTime.now() + relativedelta(months=6)).strftime('%Y-%m-%d')" />
+        </record>
+
+        <!-- Rotation des moniteurs pour le modèle de démonstration -->
+        <record id="rotation_demo_1" model="monitor.rotation.line">
+            <field name="template_id" ref="template_demo" />
+            <field name="sequence">10</field>
+            <field name="monitor_id" ref="monitor_demo_1" />
+        </record>
+
+        <record id="rotation_demo_2" model="monitor.rotation.line">
+            <field name="template_id" ref="template_demo" />
+            <field name="sequence">20</field>
+            <field name="monitor_id" ref="monitor_demo_2" />
+        </record>
+
+        <record id="rotation_demo_3" model="monitor.rotation.line">
+            <field name="template_id" ref="template_demo" />
+            <field name="sequence">30</field>
+            <field name="monitor_id" ref="monitor_demo_3" />
+        </record>
+
+        <!-- Planifications de démonstration -->
+        <record id="planning_demo_1" model="monitor.planning">
+            <field name="name">École Bethel - 2024-01-07</field>
+            <field name="template_id" ref="template_demo" />
+            <field name="school_id" ref="school_demo" />
+            <field name="monitor_id" ref="monitor_demo_1" />
+            <field name="planned_date"
+                eval="(DateTime.now() + relativedelta(days=7)).strftime('%Y-%m-%d')" />
+            <field name="start_time">9.0</field>
+            <field name="end_time">11.0</field>
+            <field name="topic">L'amour de Dieu</field>
+            <field name="target_age_group">6-12 ans</field>
+            <field name="expected_participants">25</field>
+            <field name="state">planned</field>
+        </record>
+
+        <record id="planning_demo_2" model="monitor.planning">
+            <field name="name">École Bethel - 2024-01-14</field>
+            <field name="template_id" ref="template_demo" />
+            <field name="school_id" ref="school_demo" />
+            <field name="monitor_id" ref="monitor_demo_2" />
+            <field name="planned_date"
+                eval="(DateTime.now() + relativedelta(days=14)).strftime('%Y-%m-%d')" />
+            <field name="start_time">9.0</field>
+            <field name="end_time">11.0</field>
+            <field name="topic">Les miracles de Jésus</field>
+            <field name="target_age_group">6-12 ans</field>
+            <field name="expected_participants">25</field>
+            <field name="state">confirmed</field>
+        </record>
+
+        <!-- Formations de démonstration -->
+        <record id="training_demo" model="monitor.training">
+            <field name="name">Formation pédagogie pour enfants</field>
+            <field name="description">Formation sur les méthodes pédagogiques adaptées aux enfants</field>
+            <field name="date" eval="(DateTime.now() - relativedelta(days=30)).strftime('%Y-%m-%d')" />
+            <field name="duration">4</field>
+            <field name="trainer_id" ref="base.partner_admin" />
+            <field name="training_type">continuous</field>
+            <field name="participant_ids"
+                eval="[(6, 0, [ref('monitor_demo_1'), ref('monitor_demo_2'), ref('monitor_demo_3')])]" />
+            <field name="state">completed</field>
+            <field name="average_rating">4.5</field>
+        </record>
+
+        <!-- Évaluation de démonstration -->
+        <record id="evaluation_demo" model="monitor.evaluation">
+            <field name="monitor_id" ref="monitor_demo_1" />
+            <field name="evaluator_id" ref="base.partner_admin" />
+            <field name="evaluation_date"
+                eval="(DateTime.now() - relativedelta(days=15)).strftime('%Y-%m-%d')" />
+            <field name="period_from"
+                eval="(DateTime.now() - relativedelta(months=3)).strftime('%Y-%m-%d')" />
+            <field name="period_to"
+                eval="(DateTime.now() - relativedelta(days=15)).strftime('%Y-%m-%d')" />
+            <field name="punctuality">4</field>
+            <field name="preparation">5</field>
+            <field name="teaching_quality">4</field>
+            <field name="child_interaction">5</field>
+            <field name="creativity">4</field>
+            <field name="strengths">Excellente interaction avec les enfants, très bien préparée</field>
+            <field name="areas_for_improvement">Pourrait varier davantage les activités</field>
+            <field name="recommendations">Suivre une formation sur les jeux éducatifs</field>
+        </record>
+
+        <!-- Disponibilité de démonstration -->
+        <record id="availability_demo" model="monitor.availability">
+            <field name="monitor_id" ref="monitor_demo_2" />
+            <field name="date_from"
+                eval="(DateTime.now() + relativedelta(days=30)).strftime('%Y-%m-%d')" />
+            <field name="date_to"
+                eval="(DateTime.now() + relativedelta(days=37)).strftime('%Y-%m-%d')" />
+            <field name="availability_type">unavailable</field>
+            <field name="reason">Voyage familial</field>
+        </record>
+
+        <!-- ============= DONNÉES DE DÉMONSTRATION ============= -->
+
+        <!-- Séquence pour les certificats -->
+        <record id="seq_monitor_certificate" model="ir.sequence">
+            <field name="name">Certificat Moniteur</field>
+            <field name="code">monitor.certificate</field>
+            <field name="prefix">CERT-</field>
+            <field name="padding">3</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+
+        <!-- Tâche planifiée pour les rappels -->
+        <record id="cron_monitor_planning_reminders" model="ir.cron">
+            <field name="name">Rappels de planification des moniteurs</field>
+            <field name="model_id" ref="model_monitor_planning" />
+            <field name="type">ir.actions.server</field>
+            <field name="state">code</field>
+            <field name="code">model._cron_send_reminders()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active">True</field>
+            <field name="doall">False</field>
+        </record>
+    </data>
+</odoo>

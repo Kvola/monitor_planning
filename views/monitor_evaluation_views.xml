@@ -1,0 +1,87 @@
+<odoo>
+    <!-- ============= ÉVALUATIONS ============= -->
+
+    <!-- Vue liste des évaluations -->
+    <record id="view_monitor_evaluation_tree" model="ir.ui.view">
+        <field name="name">monitor.evaluation.tree</field>
+        <field name="model">monitor.evaluation</field>
+        <field name="arch" type="xml">
+            <tree string="Évaluations">
+                <field name="monitor_id" />
+                <field name="evaluator_id" />
+                <field name="evaluation_date" />
+                <field name="period_from" />
+                <field name="period_to" />
+                <field name="overall_rating" widget="progressbar" />
+                <field name="follow_up_required" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue formulaire des évaluations -->
+    <record id="view_monitor_evaluation_form" model="ir.ui.view">
+        <field name="name">monitor.evaluation.form</field>
+        <field name="model">monitor.evaluation</field>
+        <field name="arch" type="xml">
+            <form string="Évaluation">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <span>Évaluation de </span>
+                            <field name="monitor_id" class="oe_inline" />
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="evaluator_id" />
+                            <field name="evaluation_date" />
+                        </group>
+                        <group>
+                            <field name="period_from" />
+                            <field name="period_to" />
+                        </group>
+                    </group>
+
+                    <group string="Critères d'évaluation">
+                        <group>
+                            <field name="punctuality" widget="radio" />
+                            <field name="preparation" widget="radio" />
+                            <field name="teaching_quality" widget="radio" />
+                        </group>
+                        <group>
+                            <field name="child_interaction" widget="radio" />
+                            <field name="creativity" widget="radio" />
+                            <field name="overall_rating" widget="progressbar" />
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Commentaires">
+                            <group>
+                                <field name="strengths" placeholder="Points forts observés..." />
+                                <field name="areas_for_improvement"
+                                    placeholder="Points à améliorer..." />
+                                <field name="recommendations" placeholder="Recommandations..." />
+                            </group>
+                        </page>
+                        <page string="Suivi">
+                            <group>
+                                <field name="follow_up_required" />
+                                <field name="follow_up_date" invisible="follow_up_required != True" />
+                                <field name="follow_up_notes" invisible="follow_up_required != True" />
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action pour les évaluations -->
+    <record id="action_monitor_evaluation" model="ir.actions.act_window">
+        <field name="name">Évaluations des moniteurs</field>
+        <field name="res_model">monitor.evaluation</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

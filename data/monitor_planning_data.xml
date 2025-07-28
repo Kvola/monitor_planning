@@ -1,0 +1,52 @@
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Types de formations par défaut -->
+        <record id="training_type_initial" model="monitor.training">
+            <field name="name">Formation initiale des moniteurs</field>
+            <field name="description">Formation de base pour nouveaux moniteurs</field>
+            <field name="training_type">initial</field>
+            <field name="duration">8</field>
+            <field name="trainer_id" ref="base.partner_admin"/>
+            <field name="date" eval="(DateTime.now() + relativedelta(days=30)).strftime('%Y-%m-%d')"/>
+            <field name="state">planned</field>
+        </record>
+        
+        <!-- Modèles de planification par défaut -->
+        <record id="template_sunday_school_weekly" model="monitor.planning.template">
+            <field name="name">École du dimanche - Hebdomadaire</field>
+            <field name="description">Planification hebdomadaire standard pour l'école du dimanche</field>
+            <field name="recurrence_type">weekly</field>
+            <field name="weekday">6</field>  <!-- Dimanche -->
+            <field name="start_time">9.0</field>  <!-- 9h00 -->
+            <field name="end_time">11.0</field>  <!-- 11h00 -->
+            <field name="active_from" eval="DateTime.now().strftime('%Y-%m-%d')"/>
+            <field name="active">True</field>
+        </record>
+        
+        <!-- Paramètres de configuration -->
+        <record id="config_new_member_duration" model="ir.config_parameter">
+            <field name="key">sunday_school.new_member_duration</field>
+            <field name="value">90</field>  <!-- 90 jours -->
+        </record>
+        
+        <record id="config_reminder_days_before" model="ir.config_parameter">
+            <field name="key">sunday_school.reminder_days_before</field>
+            <field name="value">3</field>  <!-- 3 jours avant -->
+        </record>
+        
+        <record id="config_default_session_duration" model="ir.config_parameter">
+            <field name="key">sunday_school.default_session_duration</field>
+            <field name="value">2.0</field>  <!-- 2 heures -->
+        </record>
+
+        <!-- Types de certificats par défaut -->
+        <record id="certificate_type_formation_initiale" model="monitor.certificate">
+            <field name="name">Formation initiale</field>
+            <field name="certificate_type">training</field>
+            <field name="description">Certificat de réussite de la formation initiale des moniteurs</field>
+            <field name="monitor_id" ref="base.partner_admin"/>
+            <field name="issued_by_id" ref="base.partner_admin"/>
+        </record>
+    </data>
+</odoo>

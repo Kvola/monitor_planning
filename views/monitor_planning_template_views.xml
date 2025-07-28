@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============= MODÈLES DE PLANIFICATION ============= -->
+
+    <!-- Vue liste des modèles de planification -->
+    <record id="view_monitor_planning_template_tree" model="ir.ui.view">
+        <field name="name">monitor.planning.template.tree</field>
+        <field name="model">monitor.planning.template</field>
+        <field name="arch" type="xml">
+            <tree string="Modèles de planification">
+                <field name="name" />
+                <field name="school_id" />
+                <field name="recurrence_type" />
+                <field name="weekday" invisible="recurrence_type != 'weekly' and recurrence_type != 'biweekly'" />
+                <field name="start_time" widget="float_time" />
+                <field name="end_time" widget="float_time" />
+                <field name="active_from" />
+                <field name="active_until" />
+                <field name="planning_count" />
+                <field name="active" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue formulaire des modèles de planification -->
+    <record id="view_monitor_planning_template_form" model="ir.ui.view">
+        <field name="name">monitor.planning.template.form</field>
+        <field name="model">monitor.planning.template</field>
+        <field name="arch" type="xml">
+            <form string="Modèle de planification">
+                <header>
+                    <button name="generate_plannings_next_period" string="Générer planifications"
+                        type="object" class="oe_highlight" />
+                    <button name="action_view_plannings" string="Voir planifications" type="object" />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_plannings" type="object" class="oe_stat_button"
+                            icon="fa-calendar">
+                            <field name="planning_count" widget="statinfo" string="Planifications" />
+                        </button>
+                    </div>
+
+                    <widget name="web_ribbon" title="Archivé" bg_color="bg-danger"
+                        invisible="active == True" />
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom du modèle de planification..." />
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group name="basic_info">
+                            <field name="description" />
+                            <field name="school_id" />
+                            <field name="active" />
+                        </group>
+                        <group name="timing">
+                            <field name="start_time" widget="float_time" />
+                            <field name="end_time" widget="float_time" />
+                            <field name="active_from" />
+                            <field name="active_until" />
+                        </group>
+                    </group>
+
+                    <group string="Récurrence">
+                        <group>
+                            <field name="recurrence_type" />
+                            <field name="weekday" invisible="recurrence_type != 'weekly' and recurrence_type != 'biweekly'" />
+                            <field name="custom_interval" invisible="recurrence_type != 'custom'" />
+                        </group>
+                        <group>
+                            <field name="monthly_type" invisible="recurrence_type != 'monthly'" />
+                            <field name="monthly_date" invisible="recurrence_type != 'monthly' or monthly_type != 'date'" />
+                            <field name="monthly_week" invisible="recurrence_type != 'monthly' or monthly_type != 'weekday'" />
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Rotation des moniteurs">
+                            <field name="monitor_rotation_ids">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle" />
+                                    <field name="monitor_id" />
+                                    <field name="planning_count" />
+                                    <field name="active" />
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Planifications générées">
+                            <field name="planning_ids" readonly="1">
+                                <tree>
+                                    <field name="planned_date" />
+                                    <field name="monitor_id" />
+                                    <field name="substitute_monitor_id" />
+                                    <field name="state" />
+                                    <field name="start_time" widget="float_time" />
+                                    <field name="end_time" widget="float_time" />
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action pour les modèles de planification -->
+    <record id="action_monitor_planning_template" model="ir.actions.act_window">
+        <field name="name">Modèles de planification</field>
+        <field name="res_model">monitor.planning.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Créer un modèle de planification</p>
+            <p>Les modèles de planification permettent de programmer automatiquement les
+                interventions des moniteurs selon une récurrence définie.</p>
+        </field>
+    </record>
+</odoo>

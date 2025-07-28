@@ -1,0 +1,101 @@
+<odoo>
+    <!-- ============= FORMATIONS ============= -->
+
+    <!-- Vue liste des formations -->
+    <record id="view_monitor_training_tree" model="ir.ui.view">
+        <field name="name">monitor.training.tree</field>
+        <field name="model">monitor.training</field>
+        <field name="arch" type="xml">
+            <tree string="Formations">
+                <field name="name" />
+                <field name="date" />
+                <field name="duration" />
+                <field name="trainer_id" />
+                <field name="training_type" />
+                <field name="participant_count" />
+                <field name="state" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue formulaire des formations -->
+    <record id="view_monitor_training_form" model="ir.ui.view">
+        <field name="name">monitor.training.form</field>
+        <field name="model">monitor.training</field>
+        <field name="arch" type="xml">
+            <form string="Formation">
+                <header>
+                    <button name="action_start_training" string="Démarrer" type="object" invisible="state != 'planned'"
+                        class="oe_highlight" />
+                    <button name="action_complete_training" string="Terminer" type="object" invisible="state != 'in_progress'"
+                        class="oe_highlight" />
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="planned,in_progress,completed" />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(action_monitor_certificate)d" type="action"
+                            class="oe_stat_button" icon="fa-certificate"
+                            context="{'search_default_training_id': active_id}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Certificats</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom de la formation..." />
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="date" />
+                            <field name="duration" />
+                            <field name="trainer_id" />
+                        </group>
+                        <group>
+                            <field name="training_type" />
+                            <field name="participant_count" />
+                        </group>
+                    </group>
+
+                    <field name="description" placeholder="Description de la formation..." />
+
+                    <notebook>
+                        <page string="Participants">
+                            <field name="participant_ids">
+                                <tree>
+                                    <field name="name" />
+                                    <field name="email" />
+                                    <field name="phone" />
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Ressources">
+                            <group>
+                                <field name="materials"
+                                    placeholder="Matériel fourni durant la formation..." />
+                                <field name="resources" placeholder="Ressources recommandées..." />
+                            </group>
+                        </page>
+                        <page string="Évaluation">
+                            <group>
+                                <field name="feedback_collected" />
+                                <field name="average_rating" />
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action pour les formations -->
+    <record id="action_monitor_training" model="ir.actions.act_window">
+        <field name="name">Formations des moniteurs</field>
+        <field name="res_model">monitor.training</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

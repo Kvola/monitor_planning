@@ -1,0 +1,64 @@
+<odoo>
+    <!-- ============= DISPONIBILITÉS ============= -->
+    
+    <!-- Vue liste des disponibilités -->
+    <record id="view_monitor_availability_tree" model="ir.ui.view">
+        <field name="name">monitor.availability.tree</field>
+        <field name="model">monitor.availability</field>
+        <field name="arch" type="xml">
+            <tree string="Disponibilités">
+                <field name="monitor_id"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="availability_type"/>
+                <field name="available_days" invisible="availability_type != 'limited'"/>
+                <field name="available_time_from" widget="float_time" invisible="availability_type != 'limited'"/>
+                <field name="available_time_to" widget="float_time" invisible="availability_type != 'limited'"/>
+                <field name="reason"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue formulaire des disponibilités -->
+    <record id="view_monitor_availability_form" model="ir.ui.view">
+        <field name="name">monitor.availability.form</field>
+        <field name="model">monitor.availability</field>
+        <field name="arch" type="xml">
+            <form string="Disponibilité">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="monitor_id"/>
+                            <field name="availability_type"/>
+                        </group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                    </group>
+
+                    <group string="Disponibilité limitée" invisible="availability_type != 'limited'">
+                        <group>
+                            <field name="available_days"/>
+                        </group>
+                        <group>
+                            <field name="available_time_from" widget="float_time"/>
+                            <field name="available_time_to" widget="float_time"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <field name="reason" colspan="2"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action pour les disponibilités -->
+    <record id="action_monitor_availability" model="ir.actions.act_window">
+        <field name="name">Disponibilités des moniteurs</field>
+        <field name="res_model">monitor.availability</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

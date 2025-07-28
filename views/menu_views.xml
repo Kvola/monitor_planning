@@ -1,0 +1,67 @@
+<odoo>
+    <!-- ============= MENUS ============= -->
+
+    <!-- Menu principal École du Dimanche -->
+    <menuitem id="menu_sunday_school_root"
+        name="École du Dimanche"
+        sequence="10" />
+
+    <!-- Sous-menu Planification -->
+    <menuitem id="menu_sunday_school_planning"
+        name="Planification"
+        parent="menu_sunday_school_root"
+        sequence="10" />
+
+    <menuitem id="menu_monitor_planning_template"
+        action="action_monitor_planning_template"
+        parent="menu_sunday_school_planning"
+        sequence="10" />
+
+    <menuitem id="menu_monitor_planning"
+        action="action_monitor_planning"
+        parent="menu_sunday_school_planning"
+        sequence="20" />
+
+    <menuitem id="menu_monitor_availability"
+        action="action_monitor_availability"
+        parent="menu_sunday_school_planning"
+        sequence="30" />
+
+    <!-- Sous-menu Suivi -->
+    <menuitem id="menu_sunday_school_monitoring"
+        name="Suivi et Évaluation"
+        parent="menu_sunday_school_root"
+        sequence="20" />
+
+    <menuitem id="menu_monitor_evaluation"
+        action="action_monitor_evaluation"
+        parent="menu_sunday_school_monitoring"
+        sequence="10" />
+
+    <menuitem id="menu_monitor_report"
+        action="action_monitor_report"
+        parent="menu_sunday_school_monitoring"
+        sequence="20" />
+
+    <!-- Sous-menu Formation -->
+    <menuitem id="menu_sunday_school_training"
+        name="Formation"
+        parent="menu_sunday_school_root"
+        sequence="30" />
+
+    <menuitem id="menu_monitor_training"
+        action="action_monitor_training"
+        parent="menu_sunday_school_training"
+        sequence="10" />
+
+    <menuitem id="menu_monitor_certificate"
+        action="action_monitor_certificate"
+        parent="menu_sunday_school_training"
+        sequence="20" />
+
+    <!-- Menu pour le tableau de bord -->
+    <menuitem id="menu_monitor_dashboard"
+        action="action_monitor_dashboard"
+        parent="menu_sunday_school_root"
+        sequence="5" />
+</odoo>

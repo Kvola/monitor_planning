@@ -1,0 +1,237 @@
+<odoo>
+    <!-- Vue calendrier des planifications -->
+    <record id="view_monitor_planning_calendar" model="ir.ui.view">
+        <field name="name">monitor.planning.calendar</field>
+        <field name="model">monitor.planning</field>
+        <field name="arch" type="xml">
+            <calendar string="Planifications des moniteurs" date_start="planned_date" color="monitor_id" mode="month">
+                <field name="name" />
+                <field name="monitor_id" />
+                <field name="school_id" />
+                <field name="start_time" />
+                <field name="end_time" />
+                <field name="state" />
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Vue liste des planifications -->
+    <record id="view_monitor_planning_tree" model="ir.ui.view">
+        <field name="name">monitor.planning.tree</field>
+        <field name="model">monitor.planning</field>
+        <field name="arch" type="xml">
+            <tree string="Planifications" decoration-info="state == 'planned'"
+                decoration-success="state == 'completed'" decoration-danger="is_overdue"
+                decoration-warning="state == 'postponed'">
+                <field name="planned_date" />
+                <field name="name" />
+                <field name="school_id" />
+                <field name="monitor_id" />
+                <field name="substitute_monitor_id" />
+                <field name="start_time" widget="float_time" />
+                <field name="end_time" widget="float_time" />
+                <field name="duration_planned" />
+                <field name="state" />
+                <field name="is_overdue" invisible="1" />
+                <field name="topic" />
+                <field name="expected_participants" />
+                <field name="actual_participants" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue formulaire des planifications -->
+    <record id="view_monitor_planning_form" model="ir.ui.view">
+        <field name="name">monitor.planning.form</field>
+        <field name="model">monitor.planning</field>
+        <field name="arch" type="xml">
+            <form string="Planification">
+                <header>
+                    <button name="action_confirm" string="Confirmer" type="object"
+                        invisible="state != 'planned'"
+                        class="oe_highlight" />
+                    <button name="action_start" string="Démarrer" type="object"
+                        invisible="state != 'confirmed'"
+                        class="oe_highlight" />
+                    <button name="action_complete" string="Terminer" type="object"
+                        invisible="state != 'in_progress'"
+                        class="oe_highlight" />
+                    <button name="action_cancel" string="Annuler" type="object"
+                        invisible="state not in ['planned', 'confirmed', 'postponed']" />
+                    <button name="action_postpone" string="Reporter" type="object"
+                        invisible="state not in ['planned', 'confirmed']" />
+                    <button name="action_request_substitute" string="Demander un remplaçant"
+                        type="object" invisible="state not in ['planned', 'confirmed']" />
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="planned,confirmed,in_progress,completed" />
+                    <field name="is_overdue" invisible="1" />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" icon="fa-clock-o"
+                            invisible="not is_overdue">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text" style="color: red;">En retard</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom de la planification..." />
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group name="basic_info">
+                            <field name="template_id" />
+                            <field name="school_id" />
+                            <field name="planned_date" />
+                        </group>
+                        <group name="timing">
+                            <field name="start_time" widget="float_time" />
+                            <field name="end_time" widget="float_time" />
+                            <field name="duration_planned" />
+                        </group>
+                    </group>
+
+                    <group string="Moniteurs">
+                        <group>
+                            <field name="monitor_id" />
+                        </group>
+                        <group>
+                            <field name="substitute_monitor_id" />
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Contenu">
+                            <group>
+                                <field name="topic" />
+                                <field name="target_age_group" />
+                                <field name="expected_participants" />
+                                <field name="description" colspan="2" />
+                            </group>
+                        </page>
+                        <page string="Réalisation" invisible="state in ['planned', 'cancelled']">
+                            <group>
+                                <group>
+                                    <field name="actual_start_time" widget="float_time" />
+                                    <field name="actual_end_time" widget="float_time" />
+                                    <field name="duration_actual" />
+                                </group>
+                                <group>
+                                    <field name="actual_participants" />
+                                    <field name="rating" />
+                                </group>
+                            </group>
+                            <group string="Retours">
+                                <field name="monitor_feedback"
+                                    placeholder="Retour du moniteur sur l'intervention..." />
+                                <field name="supervisor_feedback"
+                                    placeholder="Retour du superviseur..." />
+                            </group>
+                        </page>
+                        <page string="Suivi">
+                            <group>
+                                <field name="reminder_sent" />
+                                <field name="confirmation_requested" />
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" />
+                    <field name="message_ids" widget="mail_thread" />
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vue recherche des planifications -->
+    <record id="view_monitor_planning_search" model="ir.ui.view">
+        <field name="name">monitor.planning.search</field>
+        <field name="model">monitor.planning</field>
+        <field name="arch" type="xml">
+            <search string="Recherche planifications">
+                <field name="name" />
+                <field name="monitor_id" />
+                <field name="school_id" />
+                <field name="topic" />
+                <field name="is_overdue" />
+
+                <filter string="Planifiées" name="planned" domain="[('state', '=', 'planned')]" />
+                <filter string="Confirmées" name="confirmed" domain="[('state', '=', 'confirmed')]" />
+                <filter string="En cours" name="in_progress"
+                    domain="[('state', '=', 'in_progress')]" />
+                <filter string="Terminées" name="completed" domain="[('state', '=', 'completed')]" />
+                <filter string="En retard" name="overdue" domain="[('is_overdue', '=', True)]" />
+
+                <separator />
+                <filter string="Aujourd'hui" name="today"
+                    domain="[('planned_date', '=', context_today())]" />
+                <filter string="7 prochains jours" name="next_week"
+                    domain="[('planned_date', '&gt;=', context_today()), ('planned_date', '&lt;=', (context_today()+datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]" />
+                <filter string="30 prochains jours" name="next_month"
+                    domain="[('planned_date', '&gt;=', context_today()), ('planned_date', '&lt;=', (context_today()+datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]" />
+
+                <group expand="0" string="Grouper par">
+                    <filter string="École" name="group_school" context="{'group_by': 'school_id'}" />
+                    <filter string="Moniteur" name="group_monitor"
+                        context="{'group_by': 'monitor_id'}" />
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}" />
+                    <filter string="Date" name="group_date" context="{'group_by': 'planned_date'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action pour les planifications -->
+    <record id="action_monitor_planning" model="ir.actions.act_window">
+        <field name="name">Planifications des moniteurs</field>
+        <field name="res_model">monitor.planning</field>
+        <field name="view_mode">calendar,tree,form</field>
+        <field name="context">{'search_default_this_month': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Créer une planification</p>
+            <p>Planifiez les interventions des moniteurs à l'école du dimanche.</p>
+        </field>
+    </record>
+
+    <!-- ============= TABLEAUX DE BORD ============= -->
+
+    <!-- Vue graphique pour les statistiques des planifications -->
+    <record id="view_monitor_planning_graph" model="ir.ui.view">
+        <field name="name">monitor.planning.graph</field>
+        <field name="model">monitor.planning</field>
+        <field name="arch" type="xml">
+            <graph string="Statistiques des planifications" type="bar">
+                <field name="monitor_id" type="row" />
+                <field name="state" type="col" />
+            </graph>
+        </field>
+    </record>
+
+    <!-- Vue pivot pour les statistiques des planifications -->
+    <record id="view_monitor_planning_pivot" model="ir.ui.view">
+        <field name="name">monitor.planning.pivot</field>
+        <field name="model">monitor.planning</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse des planifications">
+                <field name="monitor_id" type="row" />
+                <field name="planned_date" interval="month" type="col" />
+                <field name="duration_planned" type="measure" />
+                <field name="actual_participants" type="measure" />
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Action pour le tableau de bord -->
+    <record id="action_monitor_dashboard" model="ir.actions.act_window">
+        <field name="name">Tableau de bord des moniteurs</field>
+        <field name="res_model">monitor.planning</field>
+        <field name="view_mode">graph,pivot</field>
+        <field name="context">{'search_default_this_month': 1}</field>
+    </record>
+
+</odoo>
