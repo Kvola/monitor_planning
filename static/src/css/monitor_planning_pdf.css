@@ -1,0 +1,385 @@
+/* CSS pour le calendrier des planifications de moniteurs */
+
+/* Variables CSS pour une maintenance facile */
+:root {
+    --calendar-primary-color: #007bff;
+    --calendar-today-bg: #fff3cd;
+    --calendar-today-border: #ffc107;
+    --calendar-weekend-bg: #f8f9fa;
+    --calendar-other-month-bg: #f8f9fa;
+    --calendar-other-month-color: #6c757d;
+    --calendar-hover-bg: #f8f9fa;
+    --calendar-cell-height: 120px;
+    --calendar-cell-height-mobile: 80px;
+    --planning-item-font-size: 0.75rem;
+    --planning-item-font-size-mobile: 0.65rem;
+}
+
+/* Calendrier principal */
+.calendar-table {
+    font-size: 0.85rem;
+    table-layout: fixed;
+    width: 100%;
+}
+
+.calendar-day {
+    min-height: var(--calendar-cell-height);
+    height: var(--calendar-cell-height);
+    border: 1px solid #dee2e6 !important;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    vertical-align: top;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    padding: 8px;
+}
+
+.calendar-day:hover {
+    background-color: var(--calendar-hover-bg) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-day:focus {
+    outline: 2px solid var(--calendar-primary-color);
+    outline-offset: -2px;
+}
+
+/* États des jours */
+.today-highlight {
+    background-color: var(--calendar-today-bg) !important;
+    border: 2px solid var(--calendar-today-border) !important;
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+}
+
+.weekend-day {
+    background-color: var(--calendar-weekend-bg);
+}
+
+.other-month {
+    background-color: var(--calendar-other-month-bg);
+    color: var(--calendar-other-month-color);
+}
+
+/* Numéro du jour */
+.day-number {
+    font-size: 1.1rem;
+    font-weight: bold;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.today-highlight .day-number {
+    color: var(--calendar-primary-color);
+}
+
+/* Badge de comptage */
+.planning-count-badge {
+    font-size: 0.7rem;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Container des planifications */
+.planning-container {
+    max-height: 90px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #adb5bd transparent;
+}
+
+.planning-container::-webkit-scrollbar {
+    width: 3px;
+}
+
+.planning-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.planning-container::-webkit-scrollbar-thumb {
+    background-color: #adb5bd;
+    border-radius: 10px;
+}
+
+.planning-container::-webkit-scrollbar-thumb:hover {
+    background-color: #6c757d;
+}
+
+/* Items de planification */
+.planning-item {
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: var(--planning-item-font-size);
+    margin-bottom: 2px;
+    padding: 3px 5px;
+    border-radius: 3px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.planning-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    position: relative;
+}
+
+.planning-item:active {
+    transform: translateY(0);
+}
+
+/* États des planifications */
+.state-planned {
+    background-color: #17a2b8;
+    color: white;
+    border-color: #138496;
+}
+
+.state-confirmed {
+    background-color: #ffc107;
+    color: #212529;
+    border-color: #e0a800;
+}
+
+.state-completed {
+    background-color: #28a745;
+    color: white;
+    border-color: #1e7e34;
+}
+
+.state-cancelled {
+    background-color: #dc3545;
+    color: white;
+    border-color: #bd2130;
+}
+
+/* Semaines du calendrier */
+.calendar-week {
+    height: var(--calendar-cell-height);
+}
+
+/* En-tête du calendrier */
+.calendar-table thead th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    text-align: center;
+    padding: 12px 8px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Indicateur "plus d'items" */
+.more-items-indicator {
+    font-size: 0.65rem;
+    color: #6c757d;
+    text-align: center;
+    margin-top: 2px;
+    cursor: pointer;
+    padding: 1px 3px;
+    border-radius: 2px;
+    transition: background-color 0.2s ease;
+}
+
+.more-items-indicator:hover {
+    background-color: #e9ecef;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .calendar-day {
+        min-height: var(--calendar-cell-height-mobile);
+        height: var(--calendar-cell-height-mobile);
+        font-size: 0.7rem;
+        padding: 4px;
+    }
+
+    .planning-item {
+        font-size: var(--planning-item-font-size-mobile);
+        padding: 1px 3px;
+        margin-bottom: 1px;
+    }
+
+    .day-number {
+        font-size: 0.9rem;
+    }
+
+    .planning-container {
+        max-height: 50px;
+    }
+
+    .calendar-week {
+        height: var(--calendar-cell-height-mobile);
+    }
+
+    .calendar-table thead th {
+        padding: 8px 4px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .calendar-day {
+        min-height: 60px;
+        height: 60px;
+        padding: 2px;
+    }
+
+    .planning-item {
+        font-size: 0.6rem;
+        padding: 1px 2px;
+    }
+
+    .day-number {
+        font-size: 0.8rem;
+    }
+
+    .planning-container {
+        max-height: 35px;
+    }
+
+    .planning-count-badge {
+        font-size: 0.6rem;
+        min-width: 16px;
+        height: 16px;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.planning-item {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Accessibilité */
+.calendar-day:focus-visible {
+    outline: 3px solid var(--calendar-primary-color);
+    outline-offset: -3px;
+}
+
+.planning-item:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -2px;
+}
+
+/* États spéciaux */
+.calendar-day.has-overdue {
+    border-left: 4px solid #dc3545;
+}
+
+.calendar-day.has-urgent {
+    border-left: 4px solid #fd7e14;
+}
+
+/* Légende */
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    margin-right: 0.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Loading state */
+.calendar-loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.calendar-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8),
+            transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    to {
+        left: 100%;
+    }
+}
+
+/* Impression */
+@media print {
+    .calendar-day {
+        min-height: 80px !important;
+        height: 80px !important;
+        font-size: 0.7rem !important;
+        break-inside: avoid;
+    }
+
+    .planning-item {
+        font-size: 0.6rem !important;
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+    }
+
+    .state-planned {
+        background-color: #f8f9fa !important;
+        color: #000 !important;
+    }
+
+    .state-confirmed {
+        background-color: #fff3cd !important;
+        color: #000 !important;
+    }
+
+    .state-completed {
+        background-color: #d4edda !important;
+        color: #000 !important;
+    }
+
+    .state-cancelled {
+        background-color: #f8d7da !important;
+        color: #000 !important;
+    }
+}
+
+/* Thème sombre (optionnel) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --calendar-weekend-bg: #2d3748;
+        --calendar-other-month-bg: #2d3748;
+        --calendar-other-month-color: #a0aec0;
+        --calendar-hover-bg: #4a5568;
+    }
+
+    .calendar-table {
+        color: #e2e8f0;
+    }
+
+    .calendar-day {
+        background-color: #1a202c;
+        border-color: #4a5568 !important;
+    }
+
+    .planning-container::-webkit-scrollbar-thumb {
+        background-color: #718096;
+    }
+}

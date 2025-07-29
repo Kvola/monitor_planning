@@ -1,108 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Template principal pour la vue de planification -->
-    <template id="planning_view" name="Planification des Moniteurs">
+    <!-- Menus et Actions -->
+    <record id="monitor_planning_website_menu" model="website.menu">
+        <field name="name">Planification Moniteurs</field>
+        <field name="url">/monitor/planning</field>
+        <field name="parent_id" ref="website.main_menu" />
+        <field name="sequence">50</field>
+    </record>
+
+    <!-- Template principal pour la liste des planifications -->
+    <template id="monitor_planning_template" name="Planification des Moniteurs">
         <t t-call="website.layout">
-            <div id="wrap" class="oe_structure oe_empty">
-                <div class="container-fluid mt-3">
-                    <!-- En-tête avec titre et navigation -->
+            <div id="wrap">
+                <div class="container mt-4">
+                    <!-- En-tête -->
                     <div class="row mb-4">
-                        <div class="col-md-8">
-                            <h1 class="mb-3">
-                                <i class="fa fa-calendar-o mr-2"></i>
-                                Planification des Moniteurs
-                            </h1>
-                            <h2 class="text-muted h4" t-esc="title"/>
-                        </div>
-                        <div class="col-md-4 text-right">
-                            <!-- Boutons de navigation -->
-                            <div class="btn-group mr-2" role="group">
-                                <a t-attf-href="/monitor/planning/{{ view_type }}?start_date={{ prev_start }}&amp;school_id={{ current_school_id or '' }}&amp;monitor_id={{ current_monitor_id or '' }}" 
-                                   class="btn btn-outline-secondary">
-                                    <i class="fa fa-chevron-left"></i> Précédent
-                                </a>
-                                <a t-attf-href="/monitor/planning/{{ view_type }}" 
-                                   class="btn btn-outline-primary">
-                                    Aujourd'hui
-                                </a>
-                                <a t-attf-href="/monitor/planning/{{ view_type }}?start_date={{ next_start }}&amp;school_id={{ current_school_id or '' }}&amp;monitor_id={{ current_monitor_id or '' }}" 
-                                   class="btn btn-outline-secondary">
-                                    Suivant <i class="fa fa-chevron-right"></i>
-                                </a>
-                            </div>
+                        <div class="col-12">
+                            <h1 class="text-primary">
+                                <i class="fa fa-calendar"></i> Planification des Moniteurs d'École
+                                du Dimanche </h1>
+                            <p class="lead">Consultez et imprimez les planifications des
+                                interventions</p>
                         </div>
                     </div>
 
-                    <!-- Barre de filtres et vues -->
+                    <!-- Filtres et navigation -->
                     <div class="row mb-4">
-                        <div class="col-md-12">
+                        <div class="col-12">
                             <div class="card">
-                                <div class="card-body p-3">
-                                    <form method="get" class="form-inline">
-                                        <!-- Sélecteur de vue -->
-                                        <div class="form-group mr-3">
-                                            <label class="mr-2"><strong>Vue:</strong></label>
-                                            <div class="btn-group" role="group">
-                                                <a href="/monitor/planning/week" 
-                                                   t-attf-class="btn btn-sm {{ 'btn-primary' if view_type == 'week' else 'btn-outline-secondary' }}">
-                                                    Semaine
-                                                </a>
-                                                <a href="/monitor/planning/month" 
-                                                   t-attf-class="btn btn-sm {{ 'btn-primary' if view_type == 'month' else 'btn-outline-secondary' }}">
-                                                    Mois
-                                                </a>
-                                                <a href="/monitor/planning/calendar" 
-                                                   class="btn btn-sm btn-outline-secondary">
-                                                    Calendrier
-                                                </a>
-                                            </div>
-                                        </div>
-
-                                        <!-- Filtres -->
-                                        <div class="form-group mr-3">
-                                            <label for="school_id" class="mr-2">École:</label>
-                                            <select name="school_id" id="school_id" class="form-control form-control-sm">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-filter"></i> Filtres et Options </h5>
+                                </div>
+                                <div class="card-body">
+                                    <form method="get" class="row g-3">
+                                        <div class="col-md-3">
+                                            <label for="school_id" class="form-label">École</label>
+                                            <select name="school_id" id="school_id"
+                                                class="form-select">
                                                 <option value="">Toutes les écoles</option>
                                                 <t t-foreach="schools" t-as="school">
-                                                    <option t-att-value="school.id" 
-                                                            t-att-selected="'selected' if school.id == current_school_id else None"
-                                                            t-esc="school.name"/>
+                                                    <option t-att-value="school.id"
+                                                        t-att-selected="'selected' if school.id == selected_school_id else None">
+                                                        <t t-esc="school.name" />
+                                                    </option>
                                                 </t>
                                             </select>
                                         </div>
-
-                                        <div class="form-group mr-3">
-                                            <label for="monitor_id" class="mr-2">Moniteur:</label>
-                                            <select name="monitor_id" id="monitor_id" class="form-control form-control-sm">
+                                        <div class="col-md-3">
+                                            <label for="monitor_id" class="form-label">Moniteur</label>
+                                            <select name="monitor_id" id="monitor_id"
+                                                class="form-select">
                                                 <option value="">Tous les moniteurs</option>
                                                 <t t-foreach="monitors" t-as="monitor">
-                                                    <option t-att-value="monitor.id" 
-                                                            t-att-selected="'selected' if monitor.id == current_monitor_id else None"
-                                                            t-esc="monitor.name"/>
+                                                    <option t-att-value="monitor.id"
+                                                        t-att-selected="'selected' if monitor.id == selected_monitor_id else None">
+                                                        <t t-esc="monitor.name" />
+                                                    </option>
                                                 </t>
                                             </select>
                                         </div>
-
-                                        <!-- Période personnalisée (visible uniquement en vue custom) -->
-                                        <t t-if="view_type == 'custom'">
-                                            <div class="form-group mr-3">
-                                                <label for="start_date" class="mr-2">Du:</label>
-                                                <input type="date" name="start_date" id="start_date" 
-                                                       class="form-control form-control-sm" 
-                                                       t-att-value="start_date"/>
+                                        <div class="col-md-2">
+                                            <label for="date_from" class="form-label">Du</label>
+                                            <input type="date" name="date_from" id="date_from"
+                                                class="form-control" t-att-value="date_from" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="date_to" class="form-label">Au</label>
+                                            <input type="date" name="date_to" id="date_to"
+                                                class="form-control" t-att-value="date_to" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">&#160;</label>
+                                            <div class="d-grid">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fa fa-search"></i> Filtrer </button>
                                             </div>
-                                            <div class="form-group mr-3">
-                                                <label for="end_date" class="mr-2">Au:</label>
-                                                <input type="date" name="end_date" id="end_date" 
-                                                       class="form-control form-control-sm" 
-                                                       t-att-value="end_date"/>
-                                            </div>
-                                        </t>
-
-                                        <button type="submit" class="btn btn-primary btn-sm">
-                                            <i class="fa fa-filter"></i> Filtrer
-                                        </button>
+                                        </div>
                                     </form>
+
+                                    <!-- Boutons d'action -->
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <div class="btn-group" role="group">
+                                                <a href="/monitor/planning/calendar"
+                                                    class="btn btn-outline-info">
+                                                    <i class="fa fa-calendar-alt"></i> Vue
+                                                    Calendrier </a>
+                                                <a href="/monitor/planning/pdf"
+                                                    class="btn btn-outline-success" target="_blank">
+                                                    <i class="fa fa-file-pdf"></i> Télécharger PDF </a>
+                                                <button onclick="window.print()"
+                                                    class="btn btn-outline-secondary">
+                                                    <i class="fa fa-print"></i> Imprimer cette page </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -111,50 +104,219 @@
                     <!-- Statistiques rapides -->
                     <div class="row mb-4">
                         <div class="col-md-3">
-                            <div class="card bg-primary text-white">
-                                <div class="card-body text-center">
-                                    <h3 t-esc="stats['total_plannings']"/>
-                                    <small>Total planifications</small>
+                            <div class="card text-center bg-primary text-white">
+                                <div class="card-body">
+                                    <h3 t-esc="len(plannings)" />
+                                    <p class="mb-0">Total Planifications</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card bg-success text-white">
-                                <div class="card-body text-center">
-                                    <h3 t-esc="stats['confirmed']"/>
-                                    <small>Confirmées</small>
+                            <div class="card text-center bg-info text-white">
+                                <div class="card-body">
+                                    <h3
+                                        t-esc="len(plannings.filtered(lambda p: p.state == 'planned'))" />
+                                    <p class="mb-0">Planifiées</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card bg-info text-white">
-                                <div class="card-body text-center">
-                                    <h3 t-esc="stats['completed']"/>
-                                    <small>Terminées</small>
+                            <div class="card text-center bg-warning text-white">
+                                <div class="card-body">
+                                    <h3
+                                        t-esc="len(plannings.filtered(lambda p: p.state == 'confirmed'))" />
+                                    <p class="mb-0">Confirmées</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card bg-warning text-white">
-                                <div class="card-body text-center">
-                                    <h3 t-esc="stats['overdue']"/>
-                                    <small>En retard</small>
+                            <div class="card text-center bg-success text-white">
+                                <div class="card-body">
+                                    <h3
+                                        t-esc="len(plannings.filtered(lambda p: p.state == 'completed'))" />
+                                    <p class="mb-0">Terminées</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Vue par jours -->
+                    <!-- Liste des planifications groupées par semaine -->
                     <div class="row">
-                        <div class="col-md-12">
-                            <t t-if="view_type == 'week'">
-                                <t t-call="monitor_planning.week_view"/>
+                        <div class="col-12">
+                            <t t-if="not plannings">
+                                <div class="alert alert-info text-center">
+                                    <i class="fa fa-info-circle fa-2x mb-3"></i>
+                                    <h4>Aucune planification trouvée</h4>
+                                    <p>Aucune planification ne correspond aux critères sélectionnés.</p>
+                                </div>
                             </t>
-                            <t t-elif="view_type == 'month'">
-                                <t t-call="monitor_planning.month_view"/>
-                            </t>
+
                             <t t-else="">
-                                <t t-call="monitor_planning.custom_view"/>
+                                <t t-foreach="weekly_plannings.values()" t-as="week_data">
+                                    <div class="card mb-4">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">
+                                                <i class="fa fa-calendar-week"></i> Semaine du <t
+                                                    t-esc="week_data['week_start'].strftime('%d/%m/%Y')" />
+                                                au <t
+                                                    t-esc="week_data['week_end'].strftime('%d/%m/%Y')" />
+                                                <span
+                                                    class="badge bg-secondary ms-2">
+                                                    <t t-esc="len(week_data['plannings'])" />
+                                                intervention(s) </span>
+                                            </h5>
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover mb-0">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>Heure</th>
+                                                            <th>École</th>
+                                                            <th>Moniteur</th>
+                                                            <th>Sujet</th>
+                                                            <th>État</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <t t-foreach="week_data['plannings']"
+                                                            t-as="planning">
+                                                            <tr>
+                                                                <td>
+                                                                    <t t-if="planning.planned_date">
+                                                                        <strong
+                                                                            t-esc="planning.planned_date.strftime('%d/%m/%Y')" />
+                                                                        <br />
+                                                                        <small class="text-muted"
+                                                                            t-esc="planning.planned_date.strftime('%A')" />
+                                                                    </t>
+                                                                    <t t-else="">
+                                                                        <span class="text-muted">Date
+                                                                            non définie</span>
+                                                                    </t>
+                                                                </td>
+                                                                <td>
+                                                                    <t t-set="start_time"
+                                                                        t-value="planning.start_time or 0" />
+                                                                    <t t-set="end_time"
+                                                                        t-value="planning.end_time or 0" />
+                                                                    <t
+                                                                        t-if="start_time and end_time">
+                                                                        <span class="fw-bold">
+                                                                            <t
+                                                                                t-esc="'{:02d}:{:02d}'.format(int(start_time), int((start_time % 1) * 60))" />
+                                                                            - <t
+                                                                                t-esc="'{:02d}:{:02d}'.format(int(end_time), int((end_time % 1) * 60))" />
+                                                                        </span>
+                                                                        <br />
+                                                                        <small class="text-muted"> (<t
+                                                                                t-esc="round(end_time - start_time, 2)" />
+                                                                            h) </small>
+                                                                    </t>
+                                                                    <t t-else="">
+                                                                        <span class="text-muted">Horaire
+                                                                            non défini</span>
+                                                                    </t>
+                                                                </td>
+                                                                <td>
+                                                                    <strong
+                                                                        t-esc="planning.school_id.name if planning.school_id else 'École non définie'" />
+                                                                </td>
+                                                                <td>
+                                                                    <strong
+                                                                        t-esc="planning.monitor_id.name if planning.monitor_id else 'Moniteur non défini'" />
+                                                                    <t
+                                                                        t-if="planning.substitute_monitor_id">
+                                                                        <br />
+                                                                        <small class="text-warning">
+                                                                            <i
+                                                                                class="fa fa-exchange-alt"></i>
+                                                                            Remplacé par: <t
+                                                                                t-esc="planning.substitute_monitor_id.name" />
+                                                                        </small>
+                                                                    </t>
+                                                                </td>
+                                                                <td>
+                                                                    <t
+                                                                        t-esc="planning.topic or 'Non défini'" />
+                                                                    <t
+                                                                        t-if="planning.expected_participants">
+                                                                        <br />
+                                                                        <small class="text-muted">
+                                                                            <i class="fa fa-users"></i>
+                                                                            <t
+                                                                                t-esc="planning.expected_participants" />
+                                                                            participants attendus </small>
+                                                                    </t>
+                                                                </td>
+                                                                <td>
+                                                                    <t t-set="state_class"
+                                                                        t-value="'secondary'" />
+                                                                    <t
+                                                                        t-if="planning.state == 'planned'"
+                                                                        t-set="state_class"
+                                                                        t-value="'info'" />
+                                                                    <t
+                                                                        t-if="planning.state == 'confirmed'"
+                                                                        t-set="state_class"
+                                                                        t-value="'warning'" />
+                                                                    <t
+                                                                        t-if="planning.state == 'completed'"
+                                                                        t-set="state_class"
+                                                                        t-value="'success'" />
+                                                                    <t
+                                                                        t-if="planning.state == 'cancelled'"
+                                                                        t-set="state_class"
+                                                                        t-value="'danger'" />
+
+                                                                    <span
+                                                                        t-att-class="'badge bg-' + state_class">
+                                                                        <t
+                                                                            t-if="planning.state == 'planned'">
+                                                                            Planifiée</t>
+                                                                        <t
+                                                                            t-elif="planning.state == 'confirmed'">
+                                                                            Confirmée</t>
+                                                                        <t
+                                                                            t-elif="planning.state == 'completed'">
+                                                                            Terminée</t>
+                                                                        <t
+                                                                            t-elif="planning.state == 'cancelled'">
+                                                                            Annulée</t>
+                                                                        <t t-else=""
+                                                                            t-esc="planning.state or 'Non défini'" />
+                                                                    </span>
+
+                                                                    <t t-try="">
+                                                                        <t
+                                                                            t-if="planning.is_overdue">
+                                                                            <br />
+                                                                            <span
+                                                                                class="badge bg-danger">
+                                                                                <i
+                                                                                    class="fa fa-exclamation-triangle"></i>
+                                                                                En retard </span>
+                                                                        </t>
+                                                                        <t t-except="" />
+                                                                    </t>
+                                                                </td>
+                                                                <td>
+                                                                    <a
+                                                                        t-att-href="'/monitor/planning/' + str(planning.id)"
+                                                                        class="btn btn-sm btn-outline-primary">
+                                                                        <i class="fa fa-eye"></i>
+                                                                        Détails </a>
+                                                                </td>
+                                                            </tr>
+                                                        </t>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
                             </t>
                         </div>
                     </div>
@@ -163,956 +325,269 @@
         </t>
     </template>
 
-    <!-- Vue semaine -->
-    <template id="week_view" name="Vue Semaine">
-        <div class="row">
-            <t t-foreach="days_list" t-as="day">
-                <div class="col-md-12 mb-3">
-                    <div t-attf-class="card {{ 'border-primary' if day['is_today'] else '' }} {{ 'bg-light' if day['is_weekend'] else '' }}">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <span t-esc="day['day_name']"/>
-                                <span t-esc="day['date'].strftime('%d/%m/%Y')"/>
-                                <t t-if="day['is_today']">
-                                    <span class="badge badge-primary ml-2">Aujourd'hui</span>
-                                </t>
-                                <span class="badge badge-secondary ml-2" t-esc="len(day['plannings'])"/>
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <t t-if="day['plannings']">
-                                <div class="row">
-                                    <t t-foreach="day['plannings']" t-as="planning">
-                                        <div class="col-md-4 mb-2">
-                                            <t t-call="monitor_planning.planning_card"/>
-                                        </div>
-                                    </t>
-                                </div>
-                            </t>
-                            <t t-else="">
-                                <p class="text-muted mb-0">Aucune planification</p>
-                            </t>
-                        </div>
-                    </div>
-                </div>
-            </t>
-        </div>
-    </template>
-
-    <!-- Vue mois -->
-    <template id="month_view" name="Vue Mois">
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead class="thead-light">
-                    <tr>
-                        <th>Lundi</th>
-                        <th>Mardi</th>
-                        <th>Mercredi</th>
-                        <th>Jeudi</th>
-                        <th>Vendredi</th>
-                        <th class="bg-light">Samedi</th>
-                        <th class="bg-light">Dimanche</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <t t-set="week_start" t-value="0"/>
-                    <t t-foreach="days_list" t-as="day">
-                        <t t-if="day_index % 7 == 0">
-                            <tr/>
-                        </t>
-                        <td t-attf-class="align-top {{ 'bg-primary text-white' if day['is_today'] else '' }} {{ 'bg-light' if day['is_weekend'] else '' }}" 
-                            style="height: 120px; width: 14.28%;">
-                            <div class="d-flex justify-content-between">
-                                <strong t-esc="day['day_number']"/>
-                                <small class="badge badge-secondary" t-if="day['plannings']" t-esc="len(day['plannings'])"/>
-                            </div>
-                            <div class="mt-1">
-                                <t t-foreach="day['plannings'][:3]" t-as="planning">
-                                    <small class="d-block text-truncate" 
-                                           t-attf-class="badge badge-{{ 'success' if planning.state == 'confirmed' else 'primary' if planning.state == 'planned' else 'secondary' }} mb-1"
-                                           t-attf-title="{{ planning.name }} - {{ planning.monitor_id.name }}">
-                                        <t t-esc="planning.name[:20]"/>
-                                    </small>
-                                </t>
-                                <t t-if="len(day['plannings']) > 3">
-                                    <small class="text-muted">+<t t-esc="len(day['plannings']) - 3"/> autres</small>
-                                </t>
-                            </div>
-                        </td>
-                        <t t-if="day_index % 7 == 6 or day_last">
-                            <tr/>
-                        </t>
-                    </t>
-                </tbody>
-            </table>
-        </div>
-    </template>
-
-    <!-- Vue personnalisée -->
-    <template id="custom_view" name="Vue Personnalisée">
-        <t t-call="monitor_planning.week_view"/>
-    </template>
-
-    <!-- Carte de planification -->
-    <template id="planning_card" name="Carte Planification">
-        <div t-attf-class="card mb-2 border-{{ 'success' if planning.state == 'confirmed' else 'primary' if planning.state == 'planned' else 'warning' if planning.state == 'in_progress' else 'secondary' }}">
-            <div class="card-body p-2">
-                <h6 class="card-title mb-1">
-                    <a t-attf-href="/monitor/planning/details/{{ planning.id }}" 
-                       class="text-decoration-none" t-esc="planning.name"/>
-                </h6>
-                <p class="card-text small mb-1">
-                    <i class="fa fa-user mr-1"></i>
-                    <strong t-esc="planning.monitor_id.name"/>
-                </p>
-                <p class="card-text small mb-1">
-                    <i class="fa fa-building mr-1"></i>
-                    <span t-esc="planning.school_id.name"/>
-                </p>
-                <p class="card-text small mb-1">
-                    <i class="fa fa-clock-o mr-1"></i>
-                    <span t-esc="'%02d:%02d' % (int(planning.start_time), int((planning.start_time % 1) * 60))"/>
-                    -
-                    <span t-esc="'%02d:%02d' % (int(planning.end_time), int((planning.end_time % 1) * 60))"/>
-                </p>
-                <t t-if="planning.topic">
-                    <p class="card-text small mb-1">
-                        <i class="fa fa-tag mr-1"></i>
-                        <span t-esc="planning.topic"/>
-                    </p>
-                </t>
-                <div class="d-flex justify-content-between align-items-center">
-                    <small t-attf-class="badge badge-{{ 'success' if planning.state == 'confirmed' else 'primary' if planning.state == 'planned' else 'warning' if planning.state == 'in_progress' else 'info' if planning.state == 'completed' else 'secondary' }}">
-                        <t t-if="planning.state == 'planned'">Planifié</t>
-                        <t t-elif="planning.state == 'confirmed'">Confirmé</t>
-                        <t t-elif="planning.state == 'in_progress'">En cours</t>
-                        <t t-elif="planning.state == 'completed'">Terminé</t>
-                        <t t-elif="planning.state == 'cancelled'">Annulé</t>
-                        <t t-else="">Reporté</t>
-                    </small>
-                    <t t-if="planning.expected_participants">
-                        <small class="text-muted">
-                            <i class="fa fa-users mr-1"></i>
-                            <span t-esc="planning.expected_participants"/>
-                        </small>
-                    </t>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <!-- Vue calendrier -->
-    <template id="calendar_view" name="Vue Calendrier">
+    <!-- Template pour la vue calendrier des planifications - VERSION CORRIGÉE -->
+    <template id="monitor_planning_calendar_template" name="Calendrier des Planifications">
         <t t-call="website.layout">
-            <div id="wrap" class="oe_structure oe_empty">
-                <div class="container-fluid mt-3">
-                    <!-- En-tête -->
+            <!-- Styles CSS intégrés -->
+            <link rel="stylesheet" href="/monitor_planning/static/src/css/monitor_planning_calendar.css" />
+            <div id="wrap">
+                <div class="container-fluid mt-4">
+                    <!-- En-tête avec actions rapides -->
                     <div class="row mb-4">
                         <div class="col-md-8">
-                            <h1 class="mb-3">
-                                <i class="fa fa-calendar mr-2"></i>
-                                Calendrier des Planifications
-                            </h1>
-                            <h2 class="text-muted h4" t-esc="month_name + ' ' + str(current_year)"/>
+                            <h1 class="text-primary mb-2">
+                                <i class="fa fa-calendar-alt"></i> Calendrier des Planifications </h1>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item">
+                                        <a href="/monitor/planning">Planifications</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">Calendrier</li>
+                                </ol>
+                            </nav>
                         </div>
-                        <div class="col-md-4 text-right">
-                            <!-- Navigation mois -->
+                        <div class="col-md-4 text-end">
                             <div class="btn-group" role="group">
-                                <a t-attf-href="/monitor/planning/calendar?year={{ prev_year }}&amp;month={{ prev_month }}" 
-                                   class="btn btn-outline-secondary">
-                                    <i class="fa fa-chevron-left"></i> Précédent
-                                </a>
-                                <a href="/monitor/planning/calendar" 
-                                   class="btn btn-outline-primary">
-                                    Aujourd'hui
-                                </a>
-                                <a t-attf-href="/monitor/planning/calendar?year={{ next_year }}&amp;month={{ next_month }}" 
-                                   class="btn btn-outline-secondary">
-                                    Suivant <i class="fa fa-chevron-right"></i>
-                                </a>
+                                <a href="/monitor/planning" class="btn btn-outline-secondary">
+                                    <i class="fa fa-list"></i> Vue Liste </a>
+                                <a href="/monitor/planning/pdf" class="btn btn-outline-success"
+                                    target="_blank">
+                                    <i class="fa fa-file-pdf"></i> PDF </a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Calendrier -->
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-body p-0">
-                                    <table class="table table-bordered mb-0">
-                                        <thead class="thead-light">
-                                            <tr>
-                                                <t t-foreach="weekdays" t-as="weekday">
-                                                    <th class="text-center p-2" t-esc="weekday"/>
-                                                </t>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <t t-foreach="calendar_data" t-as="week">
-                                                <tr>
-                                                    <t t-foreach="week" t-as="day">
-                                                        <td t-attf-class="align-top p-1 {{ 'bg-light' if not day['is_current_month'] else '' }} {{ 'bg-primary text-white' if day['is_today'] else '' }} {{ 'bg-light' if day['is_weekend'] and day['is_current_month'] else '' }}"
-                                                            style="height: 100px; width: 14.28%;">
-                                                            <div class="d-flex justify-content-between">
-                                                                <strong t-esc="day['day']"/>
-                                                                <small class="badge badge-secondary" t-if="day['plannings']" t-esc="len(day['plannings'])"/>
-                                                            </div>
-                                                            <div class="mt-1">
-                                                                <t t-foreach="day['plannings'][:2]" t-as="planning">
-                                                                    <div class="small mb-1">
-                                                                        <a t-attf-href="/monitor/planning/details/{{ planning.id }}"
-                                                                           t-attf-class="badge badge-{{ 'success' if planning.state == 'confirmed' else 'primary' if planning.state == 'planned' else 'secondary' }} text-decoration-none"
-                                                                           t-attf-title="{{ planning.name }} - {{ planning.monitor_id.name }}">
-                                                                            <t t-esc="planning.name[:15]"/>
-                                                                        </a>
-                                                                    </div>
-                                                                </t>
-                                                                <t t-if="len(day['plannings']) > 2">
-                                                                    <small class="text-muted">+<t t-esc="len(day['plannings']) - 2"/> autres</small>
-                                                                </t>
-                                                            </div>
-                                                        </td>
-                                                    </t>
-                                                </tr>
-                                            </t>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </t>
-    </template>
-
-    <!-- Vue détails d'une planification -->
-    <template id="planning_details" name="Détails Planification">
-        <t t-call="website.layout">
-            <div id="wrap" class="oe_structure oe_empty">
-                <div class="container mt-4">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <!-- En-tête -->
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <div>
-                                    <h1 class="h2" t-esc="planning.name"/>
-                                    <p class="text-muted mb-0">
-                                        <i class="fa fa-calendar mr-2"></i>
-                                        <span t-esc="planning.planned_date.strftime('%A %d %B %Y')"/>
-                                        de <span t-esc="'%02d:%02d' % (int(planning.start_time), int((planning.start_time % 1) * 60))"/>
-                                        à <span t-esc="'%02d:%02d' % (int(planning.end_time), int((planning.end_time % 1) * 60))"/>
-                                    </p>
-                                </div>
-                                <div>
-                                    <a href="/monitor/planning" class="btn btn-outline-secondary">
-                                        <i class="fa fa-arrow-left mr-2"></i>Retour à la planification
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <!-- Informations principales -->
-                                <div class="col-md-8">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5 class="mb-0">
-                                                <i class="fa fa-info-circle mr-2"></i>Informations générales
-                                            </h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-sm-6">
-                                                    <strong>École:</strong>
-                                                    <p t-esc="planning.school_id.name"/>
-                                                </div>
-                                                <div class="col-sm-6">
-                                                    <strong>Moniteur:</strong>
-                                                    <p t-esc="planning.monitor_id.name"/>
-                                                </div>
-                                            </div>
-                                            
-                                            <t t-if="planning.substitute_monitor_id">
-                                                <div class="row">
-                                                    <div class="col-sm-6">
-                                                        <strong>Moniteur remplaçant:</strong>
-                                                        <p t-esc="planning.substitute_monitor_id.name"/>
-                                                    </div>
-                                                </div>
-                                            </t>
-
-                                            <div class="row">
-                                                <div class="col-sm-6">
-                                                    <strong>État:</strong>
-                                                    <p>
-                                                        <span t-attf-class="badge badge-{{ 'success' if planning.state == 'confirmed' else 'primary' if planning.state == 'planned' else 'warning' if planning.state == 'in_progress' else 'info' if planning.state == 'completed' else 'secondary' }}">
-                                                            <t t-if="planning.state == 'planned'">Planifié</t>
-                                                            <t t-elif="planning.state == 'confirmed'">Confirmé</t>
-                                                            <t t-elif="planning.state == 'in_progress'">En cours</t>
-                                                            <t t-elif="planning.state == 'completed'">Terminé</t>
-                                                            <t t-elif="planning.state == 'cancelled'">Annulé</t>
-                                                            <t t-else="">Reporté</t>
-                                                        </span>
-                                                    </p>
-                                                </div>
-                                                <div class="col-sm-6">
-                                                    <strong>Durée prévue:</strong>
-                                                    <p t-esc="'%.1f heures' % planning.duration_planned"/>
-                                                </div>
-                                            </div>
-
-                                            <t t-if="planning.topic">
-                                                <div class="row">
-                                                    <div class="col-sm-12">
-                                                        <strong>Sujet/Thème:</strong>
-                                                        <p t-esc="planning.topic"/>
-                                                    </div>
-                                                </div>
-                                            </t>
-
-                                            <t t-if="planning.description">
-                                                <div class="row">
-                                                    <div class="col-sm-12">
-                                                        <strong>Description:</strong>
-                                                        <p t-field="planning.description"/>
-                                                    </div>
-                                                </div>
-                                            </t>
-
-                                            <t t-if="planning.target_age_group">
-                                                <div class="row">
-                                                    <div class="col-sm-6">
-                                                        <strong>Groupe d'âge:</strong>
-                                                        <p t-esc="planning.target_age_group"/>
-                                                    </div>
-                                                </div>
-                                            </t>
-                                        </div>
-                                    </div>
-
-                                    <!-- Participants -->
-                                    <div class="card mt-4">
-                                        <div class="card-header">
-                                            <h5 class="mb-0">
-                                                <i class="fa fa-users mr-2"></i>Participants
-                                            </h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-sm-6">
-                                                    <strong>Participants attendus:</strong>
-                                                    <p t-esc="planning.expected_participants or 'Non défini'"/>
-                                                </div>
-                                                <t t-if="planning.state == 'completed'">
-                                                    <div class="col-sm-6">
-                                                        <strong>Participants réels:</strong>
-                                                        <p t-esc="planning.actual_participants or 'Non renseigné'"/>
-                                                    </div>
-                                                </t>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Suivi et évaluation -->
-                                    <t t-if="planning.state in ['completed', 'in_progress']">
-                                        <div class="card mt-4">
-                                            <div class="card-header">
-                                                <h5 class="mb-0">
-                                                    <i class="fa fa-clipboard mr-2"></i>Suivi et évaluation
-                                                </h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <t t-if="planning.actual_start_time or planning.actual_end_time">
-                                                    <div class="row">
-                                                        <div class="col-sm-6">
-                                                            <strong>Heure de début réelle:</strong>
-                                                            <p t-esc="'%02d:%02d' % (int(planning.actual_start_time or 0), int(((planning.actual_start_time or 0) % 1) * 60))"/>
-                                                        </div>
-                                                        <div class="col-sm-6">
-                                                            <strong>Heure de fin réelle:</strong>
-                                                            <p t-esc="'%02d:%02d' % (int(planning.actual_end_time or 0), int(((planning.actual_end_time or 0) % 1) * 60))"/>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-sm-6">
-                                                            <strong>Durée réelle:</strong>
-                                                            <p t-esc="'%.1f heures' % planning.duration_actual"/>
-                                                        </div>
-                                                    </div>
-                                                </t>
-
-                                                <t t-if="planning.monitor_feedback">
-                                                    <div class="row">
-                                                        <div class="col-sm-12">
-                                                            <strong>Retour du moniteur:</strong>
-                                                            <p t-field="planning.monitor_feedback"/>
-                                                        </div>
-                                                    </div>
-                                                </t>
-
-                                                <t t-if="planning.supervisor_feedback">
-                                                    <div class="row">
-                                                        <div class="col-sm-12">
-                                                            <strong>Retour du superviseur:</strong>
-                                                            <p t-field="planning.supervisor_feedback"/>
-                                                        </div>
-                                                    </div>
-                                                </t>
-
-                                                <t t-if="planning.rating">
-                                                    <div class="row">
-                                                        <div class="col-sm-6">
-                                                            <strong>Évaluation:</strong>
-                                                            <p>
-                                                                <t t-foreach="range(int(planning.rating))" t-as="star">
-                                                                    <i class="fa fa-star text-warning"></i>
-                                                                </t>
-                                                                <t t-foreach="range(5 - int(planning.rating))" t-as="star">
-                                                                    <i class="fa fa-star-o text-muted"></i>
-                                                                </t>
-                                                                <span class="ml-2">(<t t-esc="planning.rating"/>/5)</span>
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </t>
-                                            </div>
-                                        </div>
-                                    </t>
-                                </div>
-
-                                <!-- Actions rapides -->
-                                <div class="col-md-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5 class="mb-0">
-                                                <i class="fa fa-cogs mr-2"></i>Actions rapides
-                                            </h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <t t-if="planning.state == 'planned'">
-                                                <a href="#" class="btn btn-success btn-block mb-2" 
-                                                   onclick="confirmPlanning({{ planning.id }})">
-                                                    <i class="fa fa-check mr-2"></i>Confirmer
-                                                </a>
-                                            </t>
-                                            
-                                            <t t-if="planning.state in ['planned', 'confirmed']">
-                                                <a href="#" class="btn btn-primary btn-block mb-2"
-                                                   onclick="startPlanning({{ planning.id }})">
-                                                    <i class="fa fa-play mr-2"></i>Commencer
-                                                </a>
-                                            </t>
-
-                                            <t t-if="planning.state == 'in_progress'">
-                                                <a href="#" class="btn btn-info btn-block mb-2"
-                                                   onclick="completePlanning({{ planning.id }})">
-                                                    <i class="fa fa-stop mr-2"></i>Terminer
-                                                </a>
-                                            </t>
-
-                                            <t t-if="planning.state not in ['completed', 'cancelled']">
-                                                <a href="#" class="btn btn-warning btn-block mb-2"
-                                                   onclick="postponePlanning({{ planning.id }})">
-                                                    <i class="fa fa-clock-o mr-2"></i>Reporter
-                                                </a>
-                                                
-                                                <a href="#" class="btn btn-secondary btn-block mb-2"
-                                                   onclick="requestSubstitute({{ planning.id }})">
-                                                    <i class="fa fa-exchange mr-2"></i>Remplaçant
-                                                </a>
-                                                
-                                                <a href="#" class="btn btn-danger btn-block"
-                                                   onclick="cancelPlanning({{ planning.id }})">
-                                                    <i class="fa fa-times mr-2"></i>Annuler
-                                                </a>
-                                            </t>
-                                        </div>
-                                    </div>
-
-                                    <!-- Informations complémentaires -->
-                                    <div class="card mt-4">
-                                        <div class="card-header">
-                                            <h5 class="mb-0">
-                                                <i class="fa fa-info mr-2"></i>Informations
-                                            </h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <t t-if="planning.template_id">
-                                                <p><strong>Modèle:</strong> <span t-esc="planning.template_id.name"/></p>
-                                            </t>
-                                            
-                                            <t t-if="planning.is_overdue">
-                                                <div class="alert alert-warning">
-                                                    <i class="fa fa-exclamation-triangle mr-2"></i>
-                                                    <strong>En retard</strong>
-                                                </div>
-                                            </t>
-
-                                            <t t-if="planning.reminder_sent">
-                                                <p class="text-muted">
-                                                    <i class="fa fa-bell mr-2"></i>Rappel envoyé
-                                                </p>
-                                            </t>
-
-                                            <t t-if="planning.confirmation_requested">
-                                                <p class="text-success">
-                                                    <i class="fa fa-check-circle mr-2"></i>Confirmation demandée
-                                                </p>
-                                            </t>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Scripts JavaScript pour les actions -->
-                <script>
-                    function confirmPlanning(planningId) {
-                        if (confirm('Confirmer cette planification ?')) {
-                            fetch('/monitor/planning/confirm', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    'planning_id': planningId
-                                })
-                            }).then(response => {
-                                if (response.ok) {
-                                    location.reload();
-                                }
-                            });
-                        }
-                    }
-
-                    function startPlanning(planningId) {
-                        if (confirm('Commencer cette intervention ?')) {
-                            fetch('/monitor/planning/start', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    'planning_id': planningId
-                                })
-                            }).then(response => {
-                                if (response.ok) {
-                                    location.reload();
-                                }
-                            });
-                        }
-                    }
-
-                    function completePlanning(planningId) {
-                        if (confirm('Terminer cette intervention ?')) {
-                            fetch('/monitor/planning/complete', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    'planning_id': planningId
-                                })
-                            }).then(response => {
-                                if (response.ok) {
-                                    location.reload();
-                                }
-                            });
-                        }
-                    }
-
-                    function postponePlanning(planningId) {
-                        if (confirm('Reporter cette planification ?')) {
-                            fetch('/monitor/planning/postpone', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    'planning_id': planningId
-                                })
-                            }).then(response => {
-                                if (response.ok) {
-                                    location.reload();
-                                }
-                            });
-                        }
-                    }
-
-                    function cancelPlanning(planningId) {
-                        if (confirm('Annuler définitivement cette planification ?')) {
-                            fetch('/monitor/planning/cancel', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    'planning_id': planningId
-                                })
-                            }).then(response => {
-                                if (response.ok) {
-                                    location.reload();
-                                }
-                            });
-                        }
-                    }
-
-                    function requestSubstitute(planningId) {
-                        // Ouvrir une modal ou rediriger vers un formulaire de demande de remplaçant
-                        window.location.href = '/monitor/planning/substitute/' + planningId;
-                    }
-                </script>
-            </div>
-        </t>
-    </template>
-
-    <!-- Template pour le dashboard des moniteurs -->
-    <template id="monitor_dashboard" name="Dashboard Moniteur">
-        <t t-call="website.layout">
-            <div id="wrap" class="oe_structure oe_empty">
-                <div class="container-fluid mt-3">
-                    <!-- En-tête du dashboard -->
+                    <!-- Filtres et navigation -->
                     <div class="row mb-4">
-                        <div class="col-md-12">
-                            <h1 class="mb-3">
-                                <i class="fa fa-dashboard mr-2"></i>
-                                Dashboard Moniteur
-                            </h1>
-                            <p class="text-muted">Vue d'ensemble de vos activités et planifications</p>
-                        </div>
-                    </div>
-
-                    <!-- Statistiques générales -->
-                    <div class="row mb-4">
-                        <div class="col-md-3">
-                            <div class="card bg-primary text-white">
-                                <div class="card-body text-center">
-                                    <h2 t-esc="stats.get('total_plannings', 0)"/>
-                                    <p class="mb-0">Planifications totales</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-success text-white">
-                                <div class="card-body text-center">
-                                    <h2 t-esc="stats.get('completed', 0)"/>
-                                    <p class="mb-0">Interventions terminées</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-warning text-white">
-                                <div class="card-body text-center">
-                                    <h2 t-esc="stats.get('upcoming', 0)"/>
-                                    <p class="mb-0">À venir cette semaine</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-info text-white">
-                                <div class="card-body text-center">
-                                    <h2 t-esc="stats.get('substitute_count', 0)"/>
-                                    <p class="mb-0">Remplacements effectués</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <!-- Prochaines interventions -->
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">
-                                        <i class="fa fa-calendar-check-o mr-2"></i>
-                                        Prochaines interventions
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <t t-if="upcoming_plannings">
-                                        <t t-foreach="upcoming_plannings" t-as="planning">
-                                            <div class="border-bottom py-2">
-                                                <div class="d-flex justify-content-between">
-                                                    <div>
-                                                        <strong t-esc="planning.name"/>
-                                                        <br/>
-                                                        <small class="text-muted">
-                                                            <i class="fa fa-building mr-1"></i>
-                                                            <span t-esc="planning.school_id.name"/>
-                                                        </small>
-                                                    </div>
-                                                    <div class="text-right">
-                                                        <div t-esc="planning.planned_date.strftime('%d/%m')"/>
-                                                        <small class="d-block text-muted">
-                                                            <span t-esc="'%02d:%02d' % (int(planning.start_time), int((planning.start_time % 1) * 60))"/>
-                                                        </small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </t>
-                                        <div class="text-center mt-3">
-                                            <a href="/monitor/planning" class="btn btn-outline-primary btn-sm">
-                                                Voir toutes les planifications
-                                            </a>
-                                        </div>
-                                    </t>
-                                    <t t-else="">
-                                        <p class="text-muted text-center">Aucune intervention planifiée</p>
-                                    </t>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Actions rapides -->
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">
-                                        <i class="fa fa-bolt mr-2"></i>
-                                        Actions rapides
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="list-group list-group-flush">
-                                        <a href="/monitor/planning/week" class="list-group-item list-group-item-action">
-                                            <i class="fa fa-calendar-o mr-2"></i>
-                                            Voir la planification de la semaine
-                                        </a>
-                                        <a href="/monitor/availability/new" class="list-group-item list-group-item-action">
-                                            <i class="fa fa-calendar-plus-o mr-2"></i>
-                                            Déclarer mes disponibilités
-                                        </a>
-                                        <a href="/monitor/report/new" class="list-group-item list-group-item-action">
-                                            <i class="fa fa-file-text-o mr-2"></i>
-                                            Créer un rapport d'activité
-                                        </a>
-                                        <a href="/monitor/training" class="list-group-item list-group-item-action">
-                                            <i class="fa fa-graduation-cap mr-2"></i>
-                                            Consulter mes formations
-                                        </a>
-                                        <a href="/monitor/certificates" class="list-group-item list-group-item-action">
-                                            <i class="fa fa-certificate mr-2"></i>
-                                            Mes certificats
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Graphiques et analyses -->
-                    <div class="row mt-4">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">
-                                        <i class="fa fa-bar-chart mr-2"></i>
-                                        Analyses des performances
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="text-center">
-                                                <h4 class="text-success" t-esc="'%.1f%%' % stats.get('completion_rate', 0)"/>
-                                                <p class="text-muted">Taux de réalisation</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="text-center">
-                                                <h4 class="text-info" t-esc="'%.1f' % stats.get('average_rating', 0)"/>
-                                                <p class="text-muted">Note moyenne</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="text-center">
-                                                <h4 class="text-warning" t-esc="'%.1f' % stats.get('total_hours', 0)"/>
-                                                <p class="text-muted">Heures d'intervention</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </t>
-    </template>
-
-    <!-- Template pour la liste des moniteurs -->
-    <template id="monitor_list" name="Liste des Moniteurs">
-        <t t-call="website.layout">
-            <div id="wrap" class="oe_structure oe_empty">
-                <div class="container-fluid mt-3">
-                    <!-- En-tête -->
-                    <div class="row mb-4">
-                        <div class="col-md-8">
-                            <h1 class="mb-3">
-                                <i class="fa fa-users mr-2"></i>
-                                Moniteurs
-                            </h1>
-                            <p class="text-muted">Gestion et suivi des moniteurs</p>
-                        </div>
-                        <div class="col-md-4 text-right">
-                            <a href="/monitor/new" class="btn btn-primary">
-                                <i class="fa fa-plus mr-2"></i>Nouveau moniteur
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Filtres -->
-                    <div class="row mb-4">
-                        <div class="col-md-12">
+                        <div class="col-12">
                             <div class="card">
                                 <div class="card-body">
-                                    <form method="get" class="form-inline">
-                                        <div class="form-group mr-3">
-                                            <label for="search" class="mr-2">Recherche:</label>
-                                            <input type="text" name="search" id="search" 
-                                                   class="form-control" placeholder="Nom du moniteur..."
-                                                   t-att-value="search_term"/>
-                                        </div>
-                                        
-                                        <div class="form-group mr-3">
-                                            <label for="status" class="mr-2">Statut:</label>
-                                            <select name="status" id="status" class="form-control">
-                                                <option value="">Tous</option>
-                                                <option value="active" t-att-selected="'selected' if status_filter == 'active' else None">Actifs</option>
-                                                <option value="inactive" t-att-selected="'selected' if status_filter == 'inactive' else None">Inactifs</option>
-                                            </select>
+                                    <div class="row align-items-center">
+                                        <!-- Navigation mois -->
+                                        <div class="col-md-6">
+                                            <div
+                                                class="d-flex justify-content-start align-items-center">
+                                                <a
+                                                    t-att-href="'/monitor/planning/calendar?year=' + str(prev_year) + '&amp;month=' + str(prev_month)"
+                                                    class="btn btn-outline-primary me-3">
+                                                    <i class="fa fa-chevron-left"></i> Précédent </a>
+                                                <h3 class="mb-0 me-3" t-esc="month_name" />
+                                                <a
+                                                    t-att-href="'/monitor/planning/calendar?year=' + str(next_year) + '&amp;month=' + str(next_month)"
+                                                    class="btn btn-outline-primary"> Suivant <i
+                                                        class="fa fa-chevron-right"></i>
+                                                </a>
+                                            </div>
                                         </div>
 
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="fa fa-search mr-2"></i>Rechercher
-                                        </button>
-                                    </form>
+                                        <!-- Filtres -->
+                                        <div class="col-md-6">
+                                            <form method="get"
+                                                class="d-flex justify-content-end align-items-center">
+                                                <div class="me-3">
+                                                    <select name="status"
+                                                        class="form-select form-select-sm">
+                                                        <option value="">Tous les statuts</option>
+                                                        <option value="planned"
+                                                            t-att-selected="'selected' if selected_status == 'planned' else None">
+                                                            Planifié</option>
+                                                        <option value="confirmed"
+                                                            t-att-selected="'selected' if selected_status == 'confirmed' else None">
+                                                            Confirmé</option>
+                                                        <option value="completed"
+                                                            t-att-selected="'selected' if selected_status == 'completed' else None">
+                                                            Terminé</option>
+                                                    </select>
+                                                </div>
+                                                <div class="me-3">
+                                                    <select name="monitor_id"
+                                                        class="form-select form-select-sm">
+                                                        <option value="">Tous les moniteurs</option>
+                                                        <t t-foreach="monitors" t-as="monitor">
+                                                            <option t-att-value="monitor.id"
+                                                                t-att-selected="'selected' if monitor.id == selected_monitor_id else None"
+                                                                t-esc="monitor.name" />
+                                                        </t>
+                                                    </select>
+                                                </div>
+                                                <input type="hidden" name="year"
+                                                    t-att-value="current_year" />
+                                                <input type="hidden" name="month"
+                                                    t-att-value="current_month" />
+                                                <button type="submit"
+                                                    class="btn btn-sm btn-primary me-2">
+                                                    <i class="fa fa-filter"></i> Filtrer </button>
+                                                <a
+                                                    t-att-href="'/monitor/planning/calendar?year=' + str(current_year) + '&amp;month=' + str(current_month)"
+                                                    class="btn btn-sm btn-secondary">
+                                                    <i class="fa fa-times"></i> Reset </a>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Liste des moniteurs -->
-                    <div class="row">
-                        <div class="col-md-12">
+                    <!-- Légende des statuts -->
+                    <div class="row mb-3">
+                        <div class="col-12">
                             <div class="card">
+                                <div class="card-body py-2">
+                                    <div
+                                        class="d-flex justify-content-center align-items-center flex-wrap">
+                                        <small class="me-4">
+                                            <span class="badge bg-info me-1"></span> Planifié </small>
+                                        <small class="me-4">
+                                            <span class="badge bg-warning me-1"></span> Confirmé </small>
+                                        <small class="me-4">
+                                            <span class="badge bg-success me-1"></span> Terminé </small>
+                                        <small class="me-4">
+                                            <span class="badge bg-secondary me-1"></span> Annulé </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendrier principal -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card shadow-sm">
                                 <div class="card-body p-0">
                                     <div class="table-responsive">
-                                        <table class="table table-hover mb-0">
-                                            <thead class="thead-light">
-                                                <tr>
-                                                    <th>Moniteur</th>
-                                                    <th>Contact</th>
-                                                    <th>Planifications</th>
-                                                    <th>Dernière intervention</th>
-                                                    <th>Note moyenne</th>
-                                                    <th>Statut</th>
-                                                    <th>Actions</th>
+                                        <table class="table table-bordered calendar-table mb-0">
+                                            <thead>
+                                                <tr class="table-primary">
+                                                    <th class="text-center py-3 fw-bold">Lundi</th>
+                                                    <th class="text-center py-3 fw-bold">Mardi</th>
+                                                    <th class="text-center py-3 fw-bold">Mercredi</th>
+                                                    <th class="text-center py-3 fw-bold">Jeudi</th>
+                                                    <th class="text-center py-3 fw-bold">Vendredi</th>
+                                                    <th class="text-center py-3 fw-bold">Samedi</th>
+                                                    <th class="text-center py-3 fw-bold">Dimanche</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <t t-if="monitors">
-                                                    <t t-foreach="monitors" t-as="monitor">
-                                                        <tr>
-                                                            <td>
-                                                                <div class="d-flex align-items-center">
-                                                                    <div class="avatar mr-3">
-                                                                        <t t-if="monitor.image_1920">
-                                                                            <img t-attf-src="data:image/png;base64,{{ monitor.image_1920 }}" 
-                                                                                 class="rounded-circle" width="40" height="40"/>
+                                                <!-- Générer le calendrier -->
+                                                <t t-set="today" t-value="datetime.date.today()" />
+                                                <t t-set="start_of_month" t-value="first_day" />
+                                                <t t-set="end_of_month" t-value="last_day" />
+
+                                                <!-- Calculer le premier lundi à afficher -->
+                                                <t t-set="calendar_start"
+                                                    t-value="start_of_month - timedelta(days=start_of_month.weekday())" />
+                                                <!-- Calculer le dernier dimanche à afficher -->
+                                                <t t-set="calendar_end"
+                                                    t-value="end_of_month + timedelta(days=(6 - end_of_month.weekday()))" />
+
+                                                <!-- Générer les semaines -->
+                                                <t t-set="current_date" t-value="calendar_start" />
+                                                <t t-while="current_date &lt;= calendar_end">
+                                                    <tr class="calendar-week">
+                                                        <!-- Générer les 7 jours de la semaine -->
+                                                        <t t-foreach="range(7)" t-as="day_offset">
+                                                            <t t-set="display_date"
+                                                                t-value="current_date + timedelta(days=day_offset)" />
+                                                            <t t-set="date_key"
+                                                                t-value="display_date.strftime('%Y-%m-%d')" />
+                                                            <t t-set="is_current_month"
+                                                                t-value="display_date.month == current_month" />
+                                                            <t t-set="is_today"
+                                                                t-value="display_date == today" />
+                                                            <t t-set="is_weekend"
+                                                                t-value="day_offset in [5, 6]" />
+                                                            <t t-set="day_plannings"
+                                                                t-value="daily_plannings.get(date_key, [])" />
+
+                                                            <td class="calendar-day p-2"
+                                                                t-att-class="('other-month' if not is_current_month else '') + (' today-highlight' if is_today else '') + (' weekend-day' if is_weekend and is_current_month else '')"
+                                                                t-att-data-date="date_key"
+                                                                t-att-onclick="'openDayModal(\'' + date_key + '\')'">
+
+                                                                <!-- En-tête du jour -->
+                                                                <div
+                                                                    class="d-flex justify-content-between align-items-start mb-1">
+                                                                    <span class="day-number"
+                                                                        t-att-class="'text-primary' if is_today else ''"
+                                                                        t-esc="display_date.day" />
+                                                                    <t t-if="day_plannings">
+                                                                        <span
+                                                                            class="badge bg-primary rounded-pill small"
+                                                                            t-esc="len(day_plannings)" />
+                                                                    </t>
+                                                                </div>
+
+                                                                <!-- Planifications du jour -->
+                                                                <t t-if="day_plannings">
+                                                                    <div class="planning-container">
+                                                                        <t
+                                                                            t-foreach="day_plannings[:4]"
+                                                                            t-as="planning">
+                                                                            <t t-set="status_class">
+                                                                                <t
+                                                                                    t-if="planning.state == 'planned'">
+                                                                                    state-planned</t>
+                                                                                <t
+                                                                                    t-elif="planning.state == 'confirmed'">
+                                                                                    state-confirmed</t>
+                                                                                <t
+                                                                                    t-elif="planning.state == 'completed'">
+                                                                                    state-completed</t>
+                                                                                <t t-else="">
+                                                                                    state-cancelled</t>
+                                                                            </t>
+
+                                                                            <div
+                                                                                class="planning-item small"
+                                                                                t-att-class="status_class"
+                                                                                t-att-data-planning-id="planning.id"
+                                                                                t-att-onclick="'event.stopPropagation(); openPlanningDetails(' + str(planning.id) + ');'"
+                                                                                t-att-title="(planning.monitor_id.name if planning.monitor_id else 'Moniteur ND') + ' - ' + (planning.school_id.name if planning.school_id else 'École ND')">
+
+                                                                                <!-- Heure si
+                                                                                disponible -->
+                                                                                <t
+                                                                                    t-set="start_time"
+                                                                                    t-value="planning.start_time or 0" />
+                                                                                <t t-if="start_time">
+                                                                                    <span
+                                                                                        class="fw-bold">
+                                                                                        <t
+                                                                                            t-esc="'{:02d}:{:02d}'.format(int(start_time), int((start_time % 1) * 60))" />
+                                                                                    </span>
+                                                                                </t>
+
+                                                                                <!-- Nom du moniteur
+                                                                                (tronqué) -->
+                                                                                <div
+                                                                                    class="text-truncate">
+                                                                                    <t
+                                                                                        t-esc="planning.monitor_id.name[:12] if planning.monitor_id else 'Moniteur ND'" />
+                                                                                </div>
+                                                                            </div>
                                                                         </t>
-                                                                        <t t-else="">
-                                                                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" 
-                                                                                 style="width: 40px; height: 40px; color: white;">
-                                                                                <i class="fa fa-user"></i>
+
+                                                                        <!-- Indicateur s'il y a
+                                                                        plus de planifications -->
+                                                                        <t
+                                                                            t-if="len(day_plannings) > 4">
+                                                                            <div
+                                                                                class="text-center mt-1">
+                                                                                <small
+                                                                                    class="text-muted">
+                                                                                    +<t
+                                                                                        t-esc="len(day_plannings) - 4" />
+                                                                                    autres </small>
                                                                             </div>
                                                                         </t>
                                                                     </div>
-                                                                    <div>
-                                                                        <strong t-esc="monitor.name"/>
-                                                                        <t t-if="monitor.function">
-                                                                            <br/><small class="text-muted" t-esc="monitor.function"/>
-                                                                        </t>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <t t-if="monitor.email">
-                                                                    <i class="fa fa-envelope mr-1"></i>
-                                                                    <a t-attf-href="mailto:{{ monitor.email }}" t-esc="monitor.email"/>
-                                                                    <br/>
-                                                                </t>
-                                                                <t t-if="monitor.phone">
-                                                                    <i class="fa fa-phone mr-1"></i>
-                                                                    <span t-esc="monitor.phone"/>
                                                                 </t>
                                                             </td>
-                                                            <td>
-                                                                <div class="small">
-                                                                    <div>Total: <strong t-esc="monitor.planning_count"/></div>
-                                                                    <div class="text-success">Terminées: <span t-esc="monitor.completed_planning_count"/></div>
-                                                                    <div class="text-warning">À venir: <span t-esc="monitor.upcoming_planning_count"/></div>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <t t-if="monitor.last_intervention_date">
-                                                                    <span t-esc="monitor.last_intervention_date.strftime('%d/%m/%Y')"/>
-                                                                </t>
-                                                                <t t-else="">
-                                                                    <span class="text-muted">Aucune</span>
-                                                                </t>
-                                                            </td>
-                                                            <td>
-                                                                <t t-if="monitor.average_evaluation_rating">
-                                                                    <div class="d-flex align-items-center">
-                                                                        <span t-esc="'%.1f' % monitor.average_evaluation_rating"/>
-                                                                        <div class="ml-2">
-                                                                            <t t-foreach="range(int(monitor.average_evaluation_rating))" t-as="star">
-                                                                                <i class="fa fa-star text-warning small"></i>
-                                                                            </t>
-                                                                            <t t-foreach="range(5 - int(monitor.average_evaluation_rating))" t-as="star">
-                                                                                <i class="fa fa-star-o text-muted small"></i>
-                                                                            </t>
-                                                                        </div>
-                                                                    </div>
-                                                                </t>
-                                                                <t t-else="">
-                                                                    <span class="text-muted">Non évalué</span>
-                                                                </t>
-                                                            </td>
-                                                            <td>
-                                                                <span t-attf-class="badge badge-{{ 'success' if monitor.active else 'secondary' }}">
-                                                                    <t t-if="monitor.active">Actif</t>
-                                                                    <t t-else="">Inactif</t>
-                                                                </span>
-                                                            </td>
-                                                            <td>
-                                                                <div class="btn-group btn-group-sm" role="group">
-                                                                    <a t-attf-href="/monitor/{{ monitor.id }}/profile" 
-                                                                       class="btn btn-outline-primary" title="Voir le profil">
-                                                                        <i class="fa fa-eye"></i>
-                                                                    </a>
-                                                                    <a t-attf-href="/monitor/{{ monitor.id }}/plannings" 
-                                                                       class="btn btn-outline-info" title="Planifications">
-                                                                        <i class="fa fa-calendar"></i>
-                                                                    </a>
-                                                                    <a t-attf-href="/monitor/{{ monitor.id }}/evaluate" 
-                                                                       class="btn btn-outline-warning" title="Évaluer">
-                                                                        <i class="fa fa-star"></i>
-                                                                    </a>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </t>
-                                                </t>
-                                                <t t-else="">
-                                                    <tr>
-                                                        <td colspan="7" class="text-center text-muted py-4">
-                                                            Aucun moniteur trouvé
-                                                        </td>
+                                                        </t>
                                                     </tr>
+                                                    <t t-set="current_date"
+                                                        t-value="current_date + timedelta(days=7)" />
                                                 </t>
                                             </tbody>
                                         </table>
@@ -1122,11 +597,845 @@
                         </div>
                     </div>
 
-                    <!-- Pagination -->
-                    <t t-if="pager">
+                    <!-- Résumé mensuel -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fa fa-chart-bar"></i> Résumé du mois </h5>
+                                    <div class="row text-center">
+                                        <div class="col-md-3">
+                                            <div class="border rounded p-3">
+                                                <h4 class="text-info mb-1" t-esc="total_planned" />
+                                                <small>Planifiées</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="border rounded p-3">
+                                                <h4 class="text-warning mb-1"
+                                                    t-esc="total_confirmed" />
+                                                <small>Confirmées</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="border rounded p-3">
+                                                <h4 class="text-success mb-1"
+                                                    t-esc="total_completed" />
+                                                <small>Terminées</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="border rounded p-3">
+                                                <h4 class="text-primary mb-1"
+                                                    t-esc="total_plannings" />
+                                                <small>Total</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scripts JavaScript -->
+            <script src="/static/src/js/dynamic_planning_pdf.js"></script>
+        </t>
+    </template>
+
+
+    <template id="monitor_planning_day_detail_template" name="Détail du Jour - Planifications">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <div class="container mt-4">
+                    <!-- En-tête -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <h1 class="text-primary mb-2">
+                                <i class="fa fa-calendar-day"></i>
+                                <t t-esc="date_formatted" />
+                            </h1>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item">
+                                        <a href="/monitor/planning">Planifications</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        <a href="/monitor/planning/calendar">Calendrier</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">
+                                        <t t-esc="date.strftime('%d/%m/%Y')" />
+                                    </li>
+                                </ol>
+                            </nav>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="btn-group" role="group">
+                                <a
+                                    t-att-href="'/monitor/planning/calendar?year=' + str(date.year) + '&amp;month=' + str(date.month)"
+                                    class="btn btn-outline-secondary">
+                                    <i class="fa fa-arrow-left"></i> Retour au Calendrier </a>
+                                <button class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#addPlanningModal">
+                                    <i class="fa fa-plus"></i> Ajouter </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistiques du jour -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fa fa-chart-bar"></i> Résumé du jour </h5>
+                                    <div class="row text-center">
+                                        <div class="col-md-3">
+                                            <div class="border rounded p-3 bg-light">
+                                                <h4 class="text-primary mb-1"
+                                                    t-esc="day_stats['total']" />
+                                                <small class="text-muted">Total</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="border rounded p-3">
+                                                <h4 class="text-info mb-1"
+                                                    t-esc="day_stats['planned']" />
+                                                <small class="text-muted">Planifiées</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="border rounded p-3">
+                                                <h4 class="text-warning mb-1"
+                                                    t-esc="day_stats['confirmed']" />
+                                                <small class="text-muted">Confirmées</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="border rounded p-3">
+                                                <h4 class="text-success mb-1"
+                                                    t-esc="day_stats['completed']" />
+                                                <small class="text-muted">Terminées</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liste des planifications -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-list"></i> Planifications du jour <span
+                                            class="badge bg-light text-dark ms-2"
+                                            t-esc="len(plannings)" />
+                                    </h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <t t-if="plannings">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Heure</th>
+                                                        <th>Moniteur</th>
+                                                        <th>École</th>
+                                                        <th>Sujet</th>
+                                                        <th>Participants</th>
+                                                        <th>Statut</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-foreach="plannings" t-as="planning">
+                                                        <tr class="planning-row"
+                                                            t-att-data-planning-id="planning.id"
+                                                            style="cursor: pointer;"
+                                                            onclick="window.location.href='/monitor/planning/' + this.getAttribute('data-planning-id')">
+
+                                                            <!-- Heure -->
+                                                            <td class="fw-bold">
+                                                                <i
+                                                                    class="fa fa-clock text-muted me-2"></i>
+                                                                <t t-set="start_time"
+                                                                    t-value="planning.start_time or 0" />
+                                                                <t t-if="start_time">
+                                                                    <t
+                                                                        t-esc="'{:02d}:{:02d}'.format(int(start_time), int((start_time % 1) * 60))" />
+                                                                </t>
+                                                                <t t-else="">Non définie</t>
+
+                                                                <t t-set="end_time"
+                                                                    t-value="planning.end_time or 0" />
+                                                                <t t-if="end_time">
+                                                                    <small class="text-muted"> - <t
+                                                                            t-esc="'{:02d}:{:02d}'.format(int(end_time), int((end_time % 1) * 60))" />
+                                                                    </small>
+                                                                </t>
+                                                            </td>
+
+                                                            <!-- Moniteur -->
+                                                            <td>
+                                                                <div
+                                                                    class="d-flex align-items-center">
+                                                                    <i
+                                                                        class="fa fa-user text-muted me-2"></i>
+                                                                    <div>
+                                                                        <div
+                                                                            t-esc="planning.monitor_id.name if planning.monitor_id else 'Moniteur N/D'" />
+                                                                        <t
+                                                                            t-if="planning.monitor_id and planning.monitor_id.phone">
+                                                                            <small
+                                                                                class="text-muted d-block">
+                                                                                <i
+                                                                                    class="fa fa-phone me-1"></i>
+                                                                                <t
+                                                                                    t-esc="planning.monitor_id.phone" />
+                                                                            </small>
+                                                                        </t>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- École -->
+                                                            <td>
+                                                                <div
+                                                                    class="d-flex align-items-center">
+                                                                    <i
+                                                                        class="fa fa-school text-muted me-2"></i>
+                                                                    <div>
+                                                                        <div
+                                                                            t-esc="planning.school_id.name if planning.school_id else 'École N/D'" />
+                                                                        <t
+                                                                            t-if="planning.school_id and planning.school_id.street">
+                                                                            <small
+                                                                                class="text-muted d-block">
+                                                                                <i
+                                                                                    class="fa fa-map-marker-alt me-1"></i>
+                                                                                <t
+                                                                                    t-esc="planning.school_id.street" />
+                                                                            </small>
+                                                                        </t>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- Sujet -->
+                                                            <td>
+                                                                <t t-if="planning.topic">
+                                                                    <div class="text-truncate"
+                                                                        style="max-width: 200px;"
+                                                                        t-att-title="planning.topic">
+                                                                        <i
+                                                                            class="fa fa-book text-muted me-2"></i>
+                                                                        <t t-esc="planning.topic" />
+                                                                    </div>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="text-muted">Non
+                                                                        défini</span>
+                                                                </t>
+                                                            </td>
+
+                                                            <!-- Participants -->
+                                                            <td class="text-center">
+                                                                <t
+                                                                    t-if="planning.expected_participants">
+                                                                    <span class="badge bg-info">
+                                                                        <i class="fa fa-users me-1"></i>
+                                                                        <t
+                                                                            t-esc="planning.expected_participants" />
+                                                                    </span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="text-muted">-</span>
+                                                                </t>
+                                                            </td>
+
+                                                            <!-- Statut -->
+                                                            <td>
+                                                                <t t-set="status_class">
+                                                                    <t
+                                                                        t-if="planning.state == 'planned'">
+                                                                        bg-info</t>
+                                                                    <t
+                                                                        t-elif="planning.state == 'confirmed'">
+                                                                        bg-warning</t>
+                                                                    <t
+                                                                        t-elif="planning.state == 'completed'">
+                                                                        bg-success</t>
+                                                                    <t t-else="">bg-secondary</t>
+                                                                </t>
+
+                                                                <t t-set="status_text">
+                                                                    <t
+                                                                        t-if="planning.state == 'planned'">
+                                                                        Planifié</t>
+                                                                    <t
+                                                                        t-elif="planning.state == 'confirmed'">
+                                                                        Confirmé</t>
+                                                                    <t
+                                                                        t-elif="planning.state == 'completed'">
+                                                                        Terminé</t>
+                                                                    <t t-else="">Inconnu</t>
+                                                                </t>
+
+                                                                <span class="badge text-white"
+                                                                    t-att-class="status_class">
+                                                                    <t t-esc="status_text" />
+                                                                </span>
+                                                            </td>
+
+                                                            <!-- Actions -->
+                                                            <td>
+                                                                <div class="btn-group btn-group-sm"
+                                                                    role="group">
+                                                                    <a
+                                                                        t-att-href="'/monitor/planning/' + str(planning.id)"
+                                                                        class="btn btn-outline-primary btn-sm"
+                                                                        onclick="event.stopPropagation();">
+                                                                        <i class="fa fa-eye"></i>
+                                                                    </a>
+                                                                    <button
+                                                                        class="btn btn-outline-secondary btn-sm"
+                                                                        onclick="event.stopPropagation(); editPlanning(this);"
+                                                                        t-att-data-planning-id="planning.id">
+                                                                        <i class="fa fa-edit"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="text-center py-5">
+                                            <div class="mb-4">
+                                                <i class="fa fa-calendar-times fa-4x text-muted"></i>
+                                            </div>
+                                            <h4 class="text-muted">Aucune planification</h4>
+                                            <p class="text-muted">
+                                                Il n'y a aucune planification prévue pour cette
+                                                date.
+                                            </p>
+                                            <button class="btn btn-primary" data-bs-toggle="modal"
+                                                data-bs-target="#addPlanningModal">
+                                                <i class="fa fa-plus"></i> Ajouter une planification </button>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline (optionnel pour une vue plus visuelle) -->
+                    <t t-if="plannings">
                         <div class="row mt-4">
-                            <div class="col-md-12 text-center">
-                                <t t-raw="pager"/>
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="fa fa-timeline"></i> Timeline du jour </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="timeline">
+                                            <t t-foreach="plannings" t-as="planning">
+                                                <div class="timeline-item">
+                                                    <div class="timeline-marker"
+                                                        t-att-class="'bg-info' if planning.state == 'planned' else 'bg-warning' if planning.state == 'confirmed' else 'bg-success'">
+                                                        <i class="fa fa-calendar"></i>
+                                                    </div>
+                                                    <div class="timeline-content">
+                                                        <div
+                                                            class="d-flex justify-content-between align-items-start">
+                                                            <div>
+                                                                <h6 class="mb-1">
+                                                                    <t t-set="start_time"
+                                                                        t-value="planning.start_time or 0" />
+                                                                <t
+                                                                        t-if="start_time">
+                                                                        <t
+                                                                            t-esc="'{:02d}:{:02d}'.format(int(start_time), int((start_time % 1) * 60))" />
+                                                                    </t>
+                                                                    - <t
+                                                                        t-esc="planning.monitor_id.name if planning.monitor_id else 'Moniteur N/D'" />
+                                                                </h6>
+                                                                <p class="mb-1">
+                                                                    <strong>
+                                                                        <t
+                                                                            t-esc="planning.school_id.name if planning.school_id else 'École N/D'" />
+                                                                    </strong>
+                                                                </p>
+                                                                <t t-if="planning.topic">
+                                                                    <p class="mb-0 text-muted">
+                                                                        <t t-esc="planning.topic" />
+                                                                    </p>
+                                                                </t>
+                                                            </div>
+                                                            <span class="badge"
+                                                                t-att-class="'bg-info' if planning.state == 'planned' else 'bg-warning' if planning.state == 'confirmed' else 'bg-success'">
+                                                                <t
+                                                                    t-if="planning.state == 'planned'">
+                                                                    Planifié</t>
+                                                                <t
+                                                                    t-elif="planning.state == 'confirmed'">
+                                                                    Confirmé</t>
+                                                                <t
+                                                                    t-elif="planning.state == 'completed'">
+                                                                    Terminé</t>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- Styles CSS pour la timeline -->
+            <style>
+                .planning-row:hover {
+                background-color: #f8f9fa !important;
+                }
+
+                .timeline {
+                position: relative;
+                padding-left: 30px;
+                }
+
+                .timeline::before {
+                content: '';
+                position: absolute;
+                left: 15px;
+                top: 0;
+                bottom: 0;
+                width: 2px;
+                background: #dee2e6;
+                }
+
+                .timeline-item {
+                position: relative;
+                margin-bottom: 20px;
+                }
+
+                .timeline-marker {
+                position: absolute;
+                left: -22px;
+                top: 5px;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 12px;
+                border: 3px solid white;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+
+                .timeline-content {
+                background: white;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                padding: 15px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                }
+
+                @media (max-width: 768px) {
+                .timeline {
+                padding-left: 20px;
+                }
+
+                .timeline-marker {
+                left: -17px;
+                width: 25px;
+                height: 25px;
+                }
+                }
+            </style>
+
+            <!-- Scripts JavaScript -->
+            <script> function editPlanning(element) { const planningId =
+                element.getAttribute('data-planning-id'); // Rediriger vers la page d'édition ou
+                ouvrir un modal window.location.href = `/monitor/planning/${planningId}/edit`; } //
+                Raccourcis clavier document.addEventListener('keydown', function(e) { if (e.key ===
+                'Escape') { // Retour au calendrier const year = '<t t-esc="date.year" />'; const
+                month = '<t t-esc="date.month" />'; window.location.href =
+                `/monitor/planning/calendar?year=${year}&amp;month=${month}`; } }); </script>
+        </t>
+    </template>
+
+
+    <!-- Template pour le détail d'une planification -->
+    <template id="monitor_planning_detail_template" name="Détail Planification">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <div class="container mt-4">
+                    <!-- En-tête -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item">
+                                        <a href="/monitor/planning">Planifications</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">Détail</li>
+                                </ol>
+                            </nav>
+                            <h1 class="text-primary">
+                                <i class="fa fa-calendar-check"></i>
+                                <t t-esc="planning.display_name or planning.name or 'Planification'" />
+                            </h1>
+                        </div>
+                    </div>
+
+                    <!-- Informations principales -->
+                    <div class="row mb-4">
+                        <div class="col-lg-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-info-circle"></i> Informations de la
+                                        planification </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <dl class="row">
+                                                <dt class="col-sm-4">Date :</dt>
+                                                <dd class="col-sm-8">
+                                                    <t t-if="planning.planned_date">
+                                                        <strong
+                                                            t-esc="planning.planned_date.strftime('%d/%m/%Y')" />
+                                                        (<t
+                                                            t-esc="planning.planned_date.strftime('%A')" />
+                                                        ) </t>
+                                                    <t t-else="">
+                                                        <span class="text-muted">Date non définie</span>
+                                                    </t>
+                                                </dd>
+
+                                                <dt class="col-sm-4">Horaire :</dt>
+                                                <dd class="col-sm-8">
+                                                    <t t-set="start_time"
+                                                        t-value="planning.start_time or 0" />
+                                                    <t t-set="end_time"
+                                                        t-value="planning.end_time or 0" />
+                                                    <t t-if="start_time and end_time">
+                                                        <strong>
+                                                            <t
+                                                                t-esc="'{:02d}:{:02d}'.format(int(start_time), int((start_time % 1) * 60))" />
+                                                            - <t
+                                                                t-esc="'{:02d}:{:02d}'.format(int(end_time), int((end_time % 1) * 60))" />
+                                                        </strong>
+                                                        <small class="text-muted"> (<t
+                                                                t-esc="round(end_time - start_time, 2)" />
+                                                            h) </small>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="text-muted">Horaire non défini</span>
+                                                    </t>
+                                                </dd>
+
+                                                <dt class="col-sm-4">École :</dt>
+                                                <dd class="col-sm-8">
+                                                    <strong
+                                                        t-esc="planning.school_id.name if planning.school_id else 'École non définie'" />
+                                                </dd>
+
+                                                <dt class="col-sm-4">Moniteur :</dt>
+                                                <dd class="col-sm-8">
+                                                    <strong
+                                                        t-esc="planning.monitor_id.name if planning.monitor_id else 'Moniteur non défini'" />
+                                                    <t t-try="">
+                                                        <t t-if="planning.substitute_monitor_id">
+                                                            <br />
+                                                            <span class="text-warning">
+                                                                <i class="fa fa-exchange-alt"></i>
+                                                                Remplacé par: <strong
+                                                                    t-esc="planning.substitute_monitor_id.name" />
+                                                            </span>
+                                                        </t>
+                                                        <t t-except="" />
+                                                    </t>
+                                                </dd>
+                                            </dl>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <dl class="row">
+                                                <dt class="col-sm-4">État :</dt>
+                                                <dd class="col-sm-8">
+                                                    <t t-set="state_class" t-value="'secondary'" />
+                                                    <t t-if="planning.state == 'planned'"
+                                                        t-set="state_class" t-value="'info'" />
+                                                    <t t-if="planning.state == 'confirmed'"
+                                                        t-set="state_class" t-value="'warning'" />
+                                                    <t t-if="planning.state == 'completed'"
+                                                        t-set="state_class" t-value="'success'" />
+                                                    <t t-if="planning.state == 'cancelled'"
+                                                        t-set="state_class" t-value="'danger'" />
+
+                                                    <span
+                                                        t-att-class="'badge bg-' + state_class + ' fs-6'">
+                                                        <t t-if="planning.state == 'planned'">
+                                                            Planifiée</t>
+                                                        <t t-elif="planning.state == 'confirmed'">
+                                                            Confirmée</t>
+                                                        <t t-elif="planning.state == 'completed'">
+                                                            Terminée</t>
+                                                        <t t-elif="planning.state == 'cancelled'">
+                                                            Annulée</t>
+                                                        <t t-else=""
+                                                            t-esc="planning.state or 'Non défini'" />
+                                                    </span>
+                                                </dd>
+
+                                                <dt class="col-sm-4">Sujet :</dt>
+                                                <dd class="col-sm-8">
+                                                    <t t-esc="planning.topic or 'Non défini'" />
+                                                </dd>
+
+                                                <dt class="col-sm-4">Groupe d'âge :</dt>
+                                                <dd class="col-sm-8">
+                                                    <t t-try="">
+                                                        <t
+                                                            t-esc="planning.target_age_group or 'Non spécifié'" />
+                                                        <t t-except="">Non spécifié</t>
+                                                    </t>
+                                                </dd>
+
+                                                <dt class="col-sm-4">Participants :</dt>
+                                                <dd class="col-sm-8">
+                                                    <t t-try="">
+                                                        <t t-if="planning.expected_participants">
+                                                            <i class="fa fa-users"></i>
+                                                            <t
+                                                                t-esc="planning.expected_participants" />
+                                                            attendus </t>
+                                                        <t t-else="">Non spécifié</t>
+                                                        <t t-except="">Non spécifié</t>
+                                                    </t>
+
+                                                    <t t-try="">
+                                                        <t t-if="planning.actual_participants">
+                                                            <br />
+                                                            <span class="text-success">
+                                                                <i class="fa fa-check"></i>
+                                                                <t
+                                                                    t-esc="planning.actual_participants" />
+                                                                réels </span>
+                                                        </t>
+                                                        <t t-except="" />
+                                                    </t>
+                                                </dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+
+                                    <t t-try="">
+                                        <t t-if="planning.description">
+                                            <hr />
+                                            <div>
+                                                <h6><i class="fa fa-file-text"></i> Description</h6>
+                                                <p t-esc="planning.description" />
+                                            </div>
+                                        </t>
+                                        <t t-except="" />
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panneau latéral -->
+                        <div class="col-lg-4">
+                            <!-- État et actions -->
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fa fa-cogs"></i> Actions </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-outline-primary"
+                                            onclick="window.print()">
+                                            <i class="fa fa-print"></i> Imprimer cette fiche </button>
+                                        <a href="/monitor/planning"
+                                            class="btn btn-outline-secondary">
+                                            <i class="fa fa-arrow-left"></i> Retour à la liste </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informations du moniteur -->
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fa fa-user"></i> Moniteur </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-center">
+                                        <h5
+                                            t-esc="planning.monitor_id.name if planning.monitor_id else 'Moniteur non défini'" />
+                                        <t t-if="planning.monitor_id and planning.monitor_id.email">
+                                            <p class="mb-1">
+                                                <i class="fa fa-envelope"></i>
+                                                <a
+                                                    t-att-href="'mailto:' + planning.monitor_id.email"
+                                                    t-esc="planning.monitor_id.email" />
+                                            </p>
+                                        </t>
+                                        <t t-if="planning.monitor_id and planning.monitor_id.phone">
+                                            <p class="mb-0">
+                                                <i class="fa fa-phone"></i>
+                                                <a t-att-href="'tel:' + planning.monitor_id.phone"
+                                                    t-esc="planning.monitor_id.phone" />
+                                            </p>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informations de l'école -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fa fa-school"></i> École </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-center">
+                                        <h5
+                                            t-esc="planning.school_id.name if planning.school_id else 'École non définie'" />
+                                        <t t-if="planning.school_id and planning.school_id.street">
+                                            <p class="mb-1">
+                                                <i class="fa fa-map-marker-alt"></i>
+                                                <t t-esc="planning.school_id.street" />
+                                                <t t-if="planning.school_id.city">
+                                                    <br />
+                                                    <t t-esc="planning.school_id.city" />
+                                                </t>
+                                            </p>
+                                        </t>
+                                        <t t-if="planning.school_id and planning.school_id.phone">
+                                            <p class="mb-0">
+                                                <i class="fa fa-phone"></i>
+                                                <a t-att-href="'tel:' + planning.school_id.phone"
+                                                    t-esc="planning.school_id.phone" />
+                                            </p>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Réalisation (si intervention terminée) -->
+                    <t t-if="planning.state == 'completed'">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="mb-0">
+                                            <i class="fa fa-check-circle"></i> Réalisation de
+                                            l'intervention </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <t t-try="">
+                                                    <t
+                                                        t-if="planning.actual_start_time and planning.actual_end_time">
+                                                        <p>
+                                                            <strong>Horaire réel :</strong>
+                                                            <t
+                                                                t-set="actual_start"
+                                                                t-value="planning.actual_start_time" />
+                                                            <t
+                                                                t-set="actual_end"
+                                                                t-value="planning.actual_end_time" />
+                                                            <t
+                                                                t-esc="'{:02d}:{:02d}'.format(int(actual_start), int((actual_start % 1) * 60))" />
+                                                            - <t
+                                                                t-esc="'{:02d}:{:02d}'.format(int(actual_end), int((actual_end % 1) * 60))" />
+                                                            (<t
+                                                                t-esc="round(actual_end - actual_start, 2)" />
+                                                            h) </p>
+                                                    </t>
+                                                    <t t-except="" />
+                                                </t>
+
+                                                <t t-try="">
+                                                    <t t-if="planning.actual_participants">
+                                                        <p>
+                                                            <strong>Participants réels :</strong>
+                                                            <t t-esc="planning.actual_participants" />
+                                                        </p>
+                                                    </t>
+                                                    <t t-except="" />
+                                                </t>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <t t-try="">
+                                                    <t t-if="planning.rating">
+                                                        <p>
+                                                            <strong>Évaluation :</strong>
+                                                            <t
+                                                                t-foreach="range(int(planning.rating))"
+                                                                t-as="star">
+                                                                <i class="fa fa-star text-warning"></i>
+                                                            </t>
+                                                            <t
+                                                                t-foreach="range(5 - int(planning.rating))"
+                                                                t-as="star">
+                                                                <i class="fa fa-star-o text-muted"></i>
+                                                            </t>
+                                                            (<t t-esc="planning.rating" />/5) </p>
+                                                    </t>
+                                                    <t t-except="" />
+                                                </t>
+                                            </div>
+                                        </div>
+
+                                        <t t-try="">
+                                            <t t-if="planning.monitor_feedback">
+                                                <hr />
+                                                <div>
+                                                    <h6><i class="fa fa-comment"></i> Retour du
+                                                        moniteur</h6>
+                                                    <p t-esc="planning.monitor_feedback" />
+                                                </div>
+                                            </t>
+                                            <t t-except="" />
+                                        </t>
+
+                                        <t t-try="">
+                                            <t t-if="planning.supervisor_feedback">
+                                                <hr />
+                                                <div>
+                                                    <h6><i class="fa fa-comment-dots"></i> Retour du
+                                                        superviseur</h6>
+                                                    <p t-esc="planning.supervisor_feedback" />
+                                                </div>
+                                            </t>
+                                            <t t-except="" />
+                                        </t>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </t>
@@ -1135,4 +1444,33 @@
         </t>
     </template>
 
+    <!-- Template d'erreur pour PDF -->
+    <template id="monitor_planning_pdf_error_template">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <div class="container mt-4">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-warning text-center">
+                                <i class="fa fa-exclamation-triangle fa-3x mb-3"></i>
+                                <h3>Impossible de générer le PDF</h3>
+                                <p t-esc="error_message" />
+                                <div class="mt-3">
+                                    <a href="/monitor/planning" class="btn btn-primary">
+                                        <i class="fa fa-arrow-left"></i> Retour aux planifications </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- CSS optimisé pour l'impression PDF -->
+    <template id="monitor_planning_pdf_assets" name="PDF Assets">
+        <xpath expr="." position="inside">
+            <link rel="stylesheet" href="/monitor/planning/static/src/css/monitor_planning_pdf.css" />
+        </xpath>
+    </template>
 </odoo>

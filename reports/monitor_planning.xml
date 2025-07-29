@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Template PDF simplifié avec corrections -->
+    <template id="monitor_planning_pdf_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <!-- En-tête du rapport -->
+                    <div class="row mb-4">
+                        <div class="col-12 text-center">
+                            <h1 style="color: #007bff; margin-bottom: 20px;">
+                                <t t-esc="report_title or 'Planification des Moniteurs'"/>
+                            </h1>
+                            <h3 style="color: #6c757d; margin-bottom: 10px;">
+                                Période du <t t-esc="date_from or 'N/A'"/> au <t t-esc="date_to or 'N/A'"/>
+                            </h3>
+                            <p style="color: #6c757d;">
+                                Rapport généré le <t t-esc="generation_date or datetime.datetime.now().strftime('%d/%m/%Y %H:%M')"/>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Résumé statistique -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <table class="table table-bordered" style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background-color: #f1f1f1;">
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Total</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Planifiées</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Confirmées</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Terminées</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Annulées</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="text-align: center;">
+                                        <td style="border: 1px solid #ddd; padding: 8px;">
+                                            <strong><t t-esc="stats.get('total', 0) if stats else 0"/></strong>
+                                        </td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">
+                                            <t t-esc="stats.get('planned', 0) if stats else 0"/>
+                                        </td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">
+                                            <t t-esc="stats.get('confirmed', 0) if stats else 0"/>
+                                        </td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">
+                                            <t t-esc="stats.get('completed', 0) if stats else 0"/>
+                                        </td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">
+                                            <t t-esc="stats.get('cancelled', 0) if stats else 0"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Liste détaillée -->
+                    <t t-if="weekly_plannings">
+                        <t t-foreach="weekly_plannings.values()" t-as="week_data">
+                            <div style="margin-bottom: 30px; page-break-inside: avoid;">
+                                <!-- En-tête de semaine -->
+                                <h4 style="background-color: #f8f9fa; padding: 10px; border: 1px solid #ddd; margin-bottom: 0;">
+                                    Semaine du 
+                                    <t t-if="week_data.get('week_start')">
+                                        <t t-esc="week_data['week_start'].strftime('%d/%m/%Y')"/>
+                                    </t>
+                                    <t t-else="">N/A</t>
+                                    au 
+                                    <t t-if="week_data.get('week_end')">
+                                        <t t-esc="week_data['week_end'].strftime('%d/%m/%Y')"/>
+                                    </t>
+                                    <t t-else="">N/A</t>
+                                    
+                                    <span style="background-color: #6c757d; color: white; padding: 2px 8px; border-radius: 3px; margin-left: 10px; font-size: 0.8em;">
+                                        <t t-set="week_plannings" t-value="week_data.get('plannings', [])"/>
+                                        <t t-esc="len(week_plannings) if week_plannings else 0"/> intervention(s)
+                                    </span>
+                                </h4>
+                                
+                                <!-- Tableau des planifications -->  
+                                <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+                                    <thead>
+                                        <tr style="background-color: #f1f1f1;">
+                                            <th style="border: 1px solid #ddd; padding: 6px; width: 12%;">Date</th>
+                                            <th style="border: 1px solid #ddd; padding: 6px; width: 10%;">Heure</th>
+                                            <th style="border: 1px solid #ddd; padding: 6px; width: 20%;">École</th>
+                                            <th style="border: 1px solid #ddd; padding: 6px; width: 18%;">Moniteur</th>
+                                            <th style="border: 1px solid #ddd; padding: 6px; width: 25%;">Sujet</th>
+                                            <th style="border: 1px solid #ddd; padding: 6px; width: 8%;">Participants</th>
+                                            <th style="border: 1px solid #ddd; padding: 6px; width: 7%;">État</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="week_data.get('plannings', [])" t-as="planning">
+                                            <t t-if="planning">
+                                                <tr>
+                                                    <!-- Date -->
+                                                    <td style="border: 1px solid #ddd; padding: 6px;">
+                                                        <t t-set="planned_date" t-value="planning.planned_date"/>
+                                                        <t t-if="planned_date">
+                                                            <t t-try="">
+                                                                <strong t-esc="planned_date.strftime('%d/%m')"/>
+                                                                <br/>
+                                                                <small t-esc="planned_date.strftime('%a')"/>
+                                                            </t>
+                                                            <t t-except="">
+                                                                <span style="color: #6c757d;">N/D</span>
+                                                            </t>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span style="color: #6c757d;">N/D</span>
+                                                        </t>
+                                                    </td>
+                                                    
+                                                    <!-- Heure -->
+                                                    <td style="border: 1px solid #ddd; padding: 6px;">
+                                                        <t t-set="start_time" t-value="planning.start_time or 0"/>
+                                                        <t t-set="end_time" t-value="planning.end_time or 0"/>
+                                                        <t t-if="start_time and end_time and start_time != end_time">
+                                                            <t t-set="start_hours" t-value="int(float(start_time))"/>
+                                                            <t t-set="start_minutes" t-value="int((float(start_time) % 1) * 60)"/>
+                                                            <t t-set="end_hours" t-value="int(float(end_time))"/>
+                                                            <t t-set="end_minutes" t-value="int((float(end_time) % 1) * 60)"/>
+                                                            <strong>
+                                                                <t t-esc="'{:02d}:{:02d}'.format(start_hours, start_minutes)"/>
+                                                                -
+                                                                <t t-esc="'{:02d}:{:02d}'.format(end_hours, end_minutes)"/>
+                                                            </strong>
+                                                            <br/>
+                                                            <small>(<t t-esc="round(float(end_time) - float(start_time), 1)"/>h)</small>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span style="color: #6c757d;">N/D</span>
+                                                        </t>
+                                                    </td>
+                                                    
+                                                    <!-- École -->
+                                                    <td style="border: 1px solid #ddd; padding: 6px;">
+                                                        <t t-set="school" t-value="planning.school_id"/>
+                                                        <strong t-esc="school.name if school else 'École N/D'"/>
+                                                        <t t-if="school and school.street">
+                                                            <br/>
+                                                            <small t-esc="school.street"/>
+                                                        </t>
+                                                    </td>
+                                                    
+                                                    <!-- Moniteur -->
+                                                    <td style="border: 1px solid #ddd; padding: 6px;">
+                                                        <t t-set="monitor" t-value="planning.monitor_id"/>
+                                                        <strong t-esc="monitor.name if monitor else 'Moniteur N/D'"/>
+                                                        
+                                                        <!-- Moniteur de substitution -->
+                                                        <t t-set="substitute" t-value="planning.substitute_monitor_id"/>
+                                                        <t t-if="substitute and substitute.name">
+                                                            <br/>
+                                                            <small style="color: #ffc107;">
+                                                                → <t t-esc="substitute.name"/>
+                                                            </small>
+                                                        </t>
+                                                        
+                                                        <!-- Téléphone -->
+                                                        <t t-if="monitor and monitor.phone">
+                                                            <br/>
+                                                            <small t-esc="monitor.phone"/>
+                                                        </t>
+                                                    </td>
+                                                    
+                                                    <!-- Sujet -->
+                                                    <td style="border: 1px solid #ddd; padding: 6px;">
+                                                        <t t-esc="planning.topic or 'Non défini'"/>
+                                                        <t t-set="age_group" t-value="planning.target_age_group"/>
+                                                        <t t-if="age_group">
+                                                            <br/>
+                                                            <small>(<t t-esc="age_group"/>)</small>
+                                                        </t>
+                                                        <t t-set="description" t-value="planning.description"/>
+                                                        <t t-if="description">
+                                                            <br/>
+                                                            <small style="color: #6c757d;">
+                                                                <t t-set="desc_str" t-value="str(description)"/>
+                                                                <t t-if="len(desc_str) > 40">
+                                                                    <t t-esc="desc_str[:40] + '...'"/>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <t t-esc="desc_str"/>
+                                                                </t>
+                                                            </small>
+                                                        </t>
+                                                    </td>
+                                                    
+                                                    <!-- Participants -->
+                                                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">
+                                                        <t t-set="expected" t-value="planning.expected_participants"/>
+                                                        <t t-if="expected">
+                                                            Prévus: <strong t-esc="expected"/>
+                                                        </t>
+                                                        <t t-set="actual" t-value="planning.actual_participants"/>
+                                                        <t t-set="state" t-value="planning.state"/>
+                                                        <t t-if="actual and state == 'completed'">
+                                                            <br/>
+                                                            Réels: <strong t-esc="actual"/>
+                                                        </t>
+                                                        <t t-if="not expected">
+                                                            -
+                                                        </t>
+                                                    </td>
+                                                    
+                                                    <!-- État -->
+                                                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">
+                                                        <t t-set="state" t-value="planning.state"/>
+                                                        <t t-if="state == 'planned'">
+                                                            <span style="background-color: #17a2b8; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Planifiée</span>
+                                                        </t>
+                                                        <t t-elif="state == 'confirmed'">
+                                                            <span style="background-color: #ffc107; color: black; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Confirmée</span>
+                                                        </t>
+                                                        <t t-elif="state == 'completed'">
+                                                            <span style="background-color: #28a745; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Terminée</span>
+                                                        </t>
+                                                        <t t-elif="state == 'cancelled'">
+                                                            <span style="background-color: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Annulée</span>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span style="background-color: #6c757d; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;" t-esc="state or 'N/D'"/>
+                                                        </t>
+                                                        
+                                                        <!-- Indicateur de retard -->
+                                                        <t t-set="is_overdue" t-value="planning.is_overdue or False"/>
+                                                        <t t-if="is_overdue">
+                                                            <br/>
+                                                            <small style="color: #dc3545;">En retard</small>
+                                                        </t>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </t>
+                    </t>
+                    
+                    <!-- Si pas de données par semaine, affichage simple -->
+                    <t t-if="not weekly_plannings and plannings">
+                        <div>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+                                <thead>
+                                    <tr style="background-color: #343a40; color: white;">
+                                        <th style="border: 1px solid #ddd; padding: 8px; width: 12%;">Date</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; width: 10%;">Heure</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; width: 20%;">École</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; width: 18%;">Moniteur</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; width: 25%;">Sujet</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; width: 8%;">Participants</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; width: 7%;">État</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="plannings" t-as="planning">
+                                        <t t-if="planning">
+                                            <tr>
+                                                <!-- Date -->
+                                                <td style="border: 1px solid #ddd; padding: 6px;">
+                                                    <t t-set="planned_date" t-value="planning.planned_date"/>
+                                                    <t t-if="planned_date">
+                                                        <t t-try="">
+                                                            <strong t-esc="planned_date.strftime('%d/%m/%Y')"/>
+                                                            <br/>
+                                                            <small t-esc="planned_date.strftime('%A')"/>
+                                                        </t>
+                                                        <t t-except="">
+                                                            <span style="color: #6c757d;">Non définie</span>
+                                                        </t>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span style="color: #6c757d;">Non définie</span>
+                                                    </t>
+                                                </td>
+                                                
+                                                <!-- Heure -->
+                                                <td style="border: 1px solid #ddd; padding: 6px;">
+                                                    <t t-set="start_time" t-value="planning.start_time or 0"/>
+                                                    <t t-set="end_time" t-value="planning.end_time or 0"/>
+                                                    <t t-if="start_time and end_time and start_time != end_time">
+                                                        <t t-set="start_hours" t-value="int(float(start_time))"/>
+                                                        <t t-set="start_minutes" t-value="int((float(start_time) % 1) * 60)"/>
+                                                        <t t-set="end_hours" t-value="int(float(end_time))"/>
+                                                        <t t-set="end_minutes" t-value="int((float(end_time) % 1) * 60)"/>
+                                                        <strong>
+                                                            <t t-esc="'{:02d}:{:02d}'.format(start_hours, start_minutes)"/>
+                                                            -
+                                                            <t t-esc="'{:02d}:{:02d}'.format(end_hours, end_minutes)"/>
+                                                        </strong>
+                                                        <br/>
+                                                        <small>(<t t-esc="round(float(end_time) - float(start_time), 1)"/>h)</small>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span style="color: #6c757d;">Non défini</span>
+                                                    </t>
+                                                </td>
+                                                
+                                                <!-- École -->
+                                                <td style="border: 1px solid #ddd; padding: 6px;">
+                                                    <t t-set="school" t-value="planning.school_id"/>
+                                                    <strong t-esc="school.name if school else 'École non définie'"/>
+                                                    <t t-if="school and school.street">
+                                                        <br/>
+                                                        <small t-esc="school.street"/>
+                                                    </t>
+                                                </td>
+                                                
+                                                <!-- Moniteur -->
+                                                <td style="border: 1px solid #ddd; padding: 6px;">
+                                                    <t t-set="monitor" t-value="planning.monitor_id"/>
+                                                    <strong t-esc="monitor.name if monitor else 'Moniteur non défini'"/>
+                                                    
+                                                    <!-- Moniteur de substitution -->
+                                                    <t t-set="substitute" t-value="planning.substitute_monitor_id"/>
+                                                    <t t-if="substitute and substitute.name">
+                                                        <br/>
+                                                        <small style="color: #ffc107;">
+                                                            → <t t-esc="substitute.name"/>
+                                                        </small>
+                                                    </t>
+                                                    
+                                                    <!-- Téléphone -->
+                                                    <t t-if="monitor and monitor.phone">
+                                                        <br/>
+                                                        <small t-esc="monitor.phone"/>
+                                                    </t>
+                                                </td>
+                                                
+                                                <!-- Sujet -->
+                                                <td style="border: 1px solid #ddd; padding: 6px;">
+                                                    <t t-esc="planning.topic or 'Non défini'"/>
+                                                    <t t-set="age_group" t-value="planning.target_age_group"/>
+                                                    <t t-if="age_group">
+                                                        <br/>
+                                                        <small>(<t t-esc="age_group"/>)</small>
+                                                    </t>
+                                                </td>
+                                                
+                                                <!-- Participants -->
+                                                <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">
+                                                    <t t-set="expected" t-value="planning.expected_participants"/>
+                                                    <t t-if="expected">
+                                                        Prévus: <strong t-esc="expected"/>
+                                                    </t>
+                                                    <t t-set="actual" t-value="planning.actual_participants"/>
+                                                    <t t-set="state" t-value="planning.state"/>
+                                                    <t t-if="actual and state == 'completed'">
+                                                        <br/>
+                                                        Réels: <strong t-esc="actual"/>
+                                                    </t>
+                                                    <t t-if="not expected">
+                                                        -
+                                                    </t>
+                                                </td>
+                                                
+                                                <!-- État -->
+                                                <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">
+                                                    <t t-set="state" t-value="planning.state"/>
+                                                    <t t-if="state == 'planned'">
+                                                        <span style="background-color: #17a2b8; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Planifiée</span>
+                                                    </t>
+                                                    <t t-elif="state == 'confirmed'">
+                                                        <span style="background-color: #ffc107; color: black; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Confirmée</span>
+                                                    </t>
+                                                    <t t-elif="state == 'completed'">
+                                                        <span style="background-color: #28a745; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Terminée</span>
+                                                    </t>
+                                                    <t t-elif="state == 'cancelled'">
+                                                        <span style="background-color: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Annulée</span>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span style="background-color: #6c757d; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;" t-esc="state or 'N/D'"/>
+                                                    </t>
+                                                    
+                                                    <!-- Indicateur de retard -->
+                                                    <t t-set="is_overdue" t-value="planning.is_overdue or False"/>
+                                                    <t t-if="is_overdue">
+                                                        <br/>
+                                                        <small style="color: #dc3545;">En retard</small>
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+
+                    <!-- Message si aucune planification -->
+                    <t t-if="not plannings">
+                        <div style="text-align: center; margin: 50px 0;">
+                            <div style="background-color: #d1ecf1; color: #0c5460; padding: 20px; border: 1px solid #bee5eb; border-radius: 5px;">
+                                <h4>Aucune planification trouvée</h4>
+                                <p>Aucune planification ne correspond aux critères sélectionnés pour cette période.</p>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Pied de page avec résumé -->
+                    <div style="margin-top: 50px; page-break-inside: avoid;">
+                        <hr style="border: 1px solid #ddd;"/>
+                        <div style="display: flex; justify-content: space-between;">
+                            <div style="width: 48%;">
+                                <h5>Résumé par moniteur :</h5>
+                                <t t-set="monitor_stats" t-value="stats.get('monitor_stats', {}) if stats else {}"/>
+                                <ul style="list-style: none; padding: 0;">
+                                    <t t-foreach="monitor_stats.items()" t-as="item">
+                                        <li style="margin-bottom: 5px;">
+                                            <strong t-esc="item[0]"/> : <t t-esc="item[1]"/> intervention(s)
+                                        </li>
+                                    </t>
+                                    <t t-if="not monitor_stats">
+                                        <li>Aucune donnée disponible</li>
+                                    </t>
+                                </ul>
+                            </div>
+                            
+                            <div style="width: 48%;">
+                                <h5>Résumé par école :</h5>
+                                <t t-set="school_stats" t-value="stats.get('school_stats', {}) if stats else {}"/>
+                                <ul style="list-style: none; padding: 0;">
+                                    <t t-foreach="school_stats.items()" t-as="item">
+                                        <li style="margin-bottom: 5px;">
+                                            <strong t-esc="item[0]"/> : <t t-esc="item[1]"/> intervention(s)
+                                        </li>
+                                    </t>
+                                    <t t-if="not school_stats">
+                                        <li>Aucune donnée disponible</li>
+                                    </t>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Définition du rapport PDF -->
+    <record id="monitor_planning_pdf_report" model="ir.actions.report">
+        <field name="name">Planification Moniteurs PDF</field>
+        <field name="model">monitor.planning</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">monitor_planning.monitor_planning_pdf_template</field>
+        <field name="report_file">monitor_planning.monitor_planning_pdf_template</field>
+        <field name="print_report_name">'Planification_Moniteurs_' + time.strftime('%Y%m%d')</field>
+        <field name="binding_model_id" ref="model_monitor_planning"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

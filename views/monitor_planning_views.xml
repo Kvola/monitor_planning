@@ -226,6 +226,27 @@
         </field>
     </record>
 
+    <!-- Action serveur pour génération automatique PDF -->
+    <record id="action_generate_planning_pdf" model="ir.actions.server">
+        <field name="name">Générer PDF Planification</field>
+        <field name="model_id" ref="model_monitor_planning"/>
+        <field name="binding_model_id" ref="model_monitor_planning"/>
+        <field name="state">code</field>
+        <field name="code">
+            if records:
+                action = {
+                    'type': 'ir.actions.report',
+                    'report_name': 'monitor_planning.monitor_planning_pdf_template',
+                    'report_type': 'qweb-pdf',
+                    'data': {
+                        'report_title': 'Planification des Moniteurs',
+                        'generation_date': fields.Datetime.now().strftime('%d/%m/%Y %H:%M'),
+                    },
+                    'context': env.context,
+                }
+        </field>
+    </record>
+
     <!-- Action pour le tableau de bord -->
     <record id="action_monitor_dashboard" model="ir.actions.act_window">
         <field name="name">Tableau de bord des moniteurs</field>

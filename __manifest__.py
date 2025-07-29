@@ -43,6 +43,7 @@ Fonctionnalités principales :
         'views/monitor_planning_template_views.xml',
         'views/monitor_planning_views.xml',
         'wizards/monitor_substitute_wizard_views.xml',
+        'reports/monitor_planning.xml',
         'views/menu_views.xml',
         'views/monitor_template_views.xml',
     ],
